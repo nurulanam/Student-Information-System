@@ -31,7 +31,8 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
     Route::middleware(['auth', 'role:super-admin'])->group(function () {
         Route::get('/statics', [StaticsController::class, 'index'])->name('statics.index');
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
-
+        Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
+        Route::delete('/users/destroy/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     });
     Route::middleware(['auth', 'role:manager|finance'])->group(function () {
         Route::get('/students', [StudentController::class, 'index'])->name('students.index');

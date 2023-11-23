@@ -43,6 +43,14 @@
                       <span class="hide-menu">Updates</span>
                     </a>
                 </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="{{ url('/') }}" aria-expanded="false">
+                      <span>
+                        <i class="ti ti-layout-dashboard"></i>
+                      </span>
+                      <span class="hide-menu">Programms</span>
+                    </a>
+                </li>
             @endif
             @if(Auth::user()->hasRole('manager|finance'))
                 <li class="sidebar-item">
