@@ -86,7 +86,6 @@
                                                 <div class="mb-3">
                                                     <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
                                                     <select name="role" class="form-control" id="role">
-                                                        <option value="">Select a role</option>
                                                         @foreach ($roles as $key => $role)
                                                             <option value="{{ $role->name }}" @if ($role->name === $user->role) selected @endif>
                                                                 @if ($role->name == 'super-admin')

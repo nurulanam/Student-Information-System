@@ -35,17 +35,22 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
         Route::put('/users/update', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/destroy/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     });
+
     Route::middleware(['auth', 'role:manager|finance'])->group(function () {
         Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+        Route::post('/students/store', [StudentController::class, 'store'])->name('students.store');
     });
+
     Route::middleware(['auth', 'role:manager|finance|admin'])->group(function () {
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
     });
+
     Route::middleware(['auth', 'role:manager'])->group(function () {
 
         Route::get('/updates', [UpdateController::class, 'index'])->name('updates.index');
 
     });
+    
     Route::middleware(['auth', 'role:finance'])->group(function () {
 
     });
