@@ -51,11 +51,77 @@
                                     </td>
                                     <td class="border-bottom-0">
                                     <div class="d-flex align-items-center gap-2">
-                                        <button class="btn btn-success btn-sm"><i class="ti ti-pencil"></i></button>
+                                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editUser{{ $user->id }}"><i class="ti ti-pencil"></i></button>
                                         <a href="{{ route('users.destroy', $user->id) }}" class="btn btn-danger btn-sm" data-confirm-delete="true">Delete</a>
                                     </div>
                                     </td>
                                 </tr>
+                                {{-- edit modal  --}}
+                                <div class="modal fade" id="editUser{{ $user->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Update User</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="{{ route('users.update') }}" method="post">
+                                                @method('PUT')
+                                                @csrf
+                                                <input type="hidden" name="id" value="{{ $user->id }}" required>
+                                                <div class="mb-3">
+                                                    <label for="name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                                                    <input type="text" name="name" class="form-control" value="{{ $user->name }}" id="name" required>
+                                                    @error('name')
+                                                        <p class="text-danger">{{  $message }}</p>
+                                                    @enderror
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="email" class="form-label">Email address <span class="text-danger">*</span></label>
+                                                    <input type="email" name="email" class="form-control" value="{{ $user->email }}" id="email" required>
+                                                    @error('email')
+                                                        <p class="text-danger">{{  $message }}</p>
+                                                    @enderror
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+                                                    <select name="role" class="form-control" id="role">
+                                                        <option value="">Select a role</option>
+                                                        @foreach ($roles as $key => $role)
+                                                            <option value="{{ $role->name }}" @if ($role->name === $user->role) selected @endif>
+                                                                @if ($role->name == 'super-admin')
+                                                                    Super Admin
+                                                                @elseif ($role->name == 'manager')
+                                                                    Manager
+                                                                @elseif ($role->name == 'finance')
+                                                                    Finance
+                                                                @elseif ($role->name == 'admin')
+                                                                    Admin
+                                                                @else
+                                                                    Unknown
+                                                                @endif </option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('role')
+                                                        <p class="text-danger">{{  $message }}</p>
+                                                    @enderror
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="newPassword" class="form-label">Password</label>
+                                                    <input type="password" name="new_password" class="form-control" id="newPassword" autocomplete="new-password" autocorrect="off">
+                                                    @error('new_password')
+                                                        <p class="text-danger">{{  $message }}</p>
+                                                    @enderror
+                                                </div>
+                                                <div class="d-flex justify-content-end align-items-center gap-2">
+                                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                                                    <button class="btn btn-primary">Update</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
                             @endforeach
                         </tbody>
                       </table>

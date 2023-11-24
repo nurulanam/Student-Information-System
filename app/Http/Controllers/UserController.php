@@ -34,7 +34,7 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            Alert::error('Error', "Please fill correct information");
+            Alert::error('Error', "Please fill correct information.");
             return redirect()->back()->withErrors($validator)->withInput();
         }else{
             $user = User::create([
@@ -45,22 +45,54 @@ class UserController extends Controller
             if (isset($user)) {
                 $user->assignRole($request->role);
                 $user->update(['role' => $request->role]);
-                Alert::success('Success', "User created as $request->role");
+                Alert::success('Success', "User created as $request->role.");
                 return redirect()->route("users.index");
             }else{
-                Alert::error('Error', "Please fill correct information");
+                Alert::error('Error', "Please fill correct information.");
                 return redirect()->route("users.index");
             }
         }
     }
-    public function destroy($id){
+
+    public function update(Request $request): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            "name" => "required|string",
+            "id" => "required|numeric",
+            "email" => "required|unique:users,email,{$request->id}",
+            "role" => "required|exists:roles,name",
+            "new_password" => "nullable|min:8",
+        ]);
+        if ($validator->fails()) {
+            Alert::error('Error', "Please fill correct information");
+            return redirect()->back()->withErrors($validator)->withInput();
+         } else{
+            $user = User::find($request->id);
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->password = Hash::make($request->new_password);
+            $user->update();
+            if (isset($user)) {
+                $user->assignRole($request->role);
+                $user->update(["role"=> $request->role]);
+                Alert::success('Success', "User updated as $request->role.");
+                return redirect()->route("users.index");
+            } else{
+                Alert::error('Error', "Please fill correct information.");
+                return redirect()->route("users.index");
+            }
+         }
+    }
+
+    public function destroy($id): RedirectResponse
+    {
         $user = User::find($id);
         if (isset($user)) {
             $user->delete();
-            Alert::success('Success', "User deleted");
+            Alert::success('Success', "User deleted successfully.");
             return redirect()->route("users.index");
         }else{
-            Alert::error('Error', "User not found");
+            Alert::error('Error', "User not found.");
             return redirect()->back();
         }
     }

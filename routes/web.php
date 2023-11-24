@@ -32,6 +32,7 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
         Route::get('/statics', [StaticsController::class, 'index'])->name('statics.index');
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
+        Route::put('/users/update', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/destroy/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     });
     Route::middleware(['auth', 'role:manager|finance'])->group(function () {
