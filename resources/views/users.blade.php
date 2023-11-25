@@ -126,6 +126,10 @@
                       </table>
                 </div>
             </div>
+
+            <div class="d-flex justify-content-end align-items-end">
+                {!! $users->links() !!}
+            </div>
             <!-- Modal -->
             <div class="modal fade" id="addUser" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">

@@ -12,12 +12,24 @@ class StudentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $title = 'Delete Student!';
         $text = "Are you sure you want to delete?";
         confirmDelete($title, $text);
-        $students = Student::all();
+
+        $searchQuery = $request->search;
+
+        if ($searchQuery) {
+            $students = Student::where('full_name', 'like', '%' . $searchQuery . '%')
+                                ->orWhere('std_id', 'like', '%' . $searchQuery . '%')
+                                ->orWhere('phone', 'like', '%' . $searchQuery . '%')
+                                ->orWhere('email', 'like', '%' . $searchQuery . '%')
+                                ->paginate(20);
+            $students->appends(['search' => $searchQuery]);
+        } else {
+            $students = Student::paginate(20);
+        }
         return view('students', compact('students'));
     }
 
@@ -42,7 +54,7 @@ class StudentController extends Controller
                 'std_id'=> $this->generateUniqueStudentID()
             ]);
             if (isset($student)) {
-                Alert::success('Success', "Student created successfully. {$this->generateUniqueStudentID()} {$request->phone}");
+                Alert::success('Success', "Student created successfully. {$this->generateUniqueStudentID()}");
                 return redirect()->back();
             } else {
                 Alert::error('Error', "Please fill correct information.");
@@ -52,19 +64,35 @@ class StudentController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            "new_name" => "required|string",
+            "id" => "required|numeric",
+            "new_email" => "required|unique:students,email,{$request->id}",
+            'new_phone' => 'required|regex:/^(\+?\d{1,4}[\s-]?)?\(?\d{1,4}\)?[\s.-]?\d{1,10}$/',
+        ]);
+        if ($validator->fails()) {
+            Alert::error('Error', "Please fill correct information.");
+            return redirect()->back()->withErrors($validator)->withInput();
+        } else {
+            $student = Student::find($request->id);
+            if (isset($student)) {
+                $student->update([
+                    'full_name' => $request->new_name,
+                    'email'=> $request->new_email,
+                    'phone'=> $request->new_phone,
+                ]);
+                Alert::success('Success', "Student updated successfully.");
+                return redirect()->route("students.index");
+            }else {
+                Alert::error('Error', "Please fill correct information.");
+                return redirect()->route("students.index");
+            }
+
+        }
     }
 
     /**
@@ -72,9 +100,19 @@ class StudentController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $student = Student::where('std_id', $id)->first();
+        if (isset($student)) {
+            $student->delete();
+            Alert::success('Success', "Student deleted successfully.");
+            return redirect()->route("students.index");
+        }else{
+            Alert::error('Error', "Student not found.");
+            return redirect()->back();
+        }
     }
-
+    /**
+     * Generate Student ID
+     */
     private function generateUniqueStudentID()
     {
         $prefix = 'ST';

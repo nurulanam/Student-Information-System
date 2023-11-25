@@ -44,11 +44,11 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ url('/') }}" aria-expanded="false">
+                    <a class="sidebar-link" href="{{ route('programs.index') }}" aria-expanded="false">
                       <span>
                         <i class="ti ti-layout-dashboard"></i>
                       </span>
-                      <span class="hide-menu">Programms</span>
+                      <span class="hide-menu">Programs</span>
                     </a>
                 </li>
             @endif

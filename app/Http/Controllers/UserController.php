@@ -84,7 +84,7 @@ class UserController extends Controller
          }
     }
 
-    public function destroy($id): RedirectResponse
+    public function destroy(string $id): RedirectResponse
     {
         $user = User::find($id);
         if (isset($user)) {
