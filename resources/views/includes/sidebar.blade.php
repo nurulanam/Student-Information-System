@@ -52,6 +52,16 @@
                     </a>
                 </li>
             @endif
+            @if(Auth::user()->hasRole('manager|finance|admin'))
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="{{ route('enrollments.index') }}" aria-expanded="false">
+                    <span>
+                        <i class="ti ti-user-plus"></i>
+                    </span>
+                    <span class="hide-menu">Enrollment</span>
+                    </a>
+                </li>
+            @endif
             @if(Auth::user()->hasRole('manager|finance'))
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('students.index') }}" aria-expanded="false">
@@ -80,7 +90,6 @@
                     </a>
                 </li>
             @endif
-
         </ul>
       </nav>
       <!-- End Sidebar navigation -->

@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\StaticsController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ProgramController;
@@ -50,6 +51,7 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
 
     Route::middleware(['auth', 'role:manager|finance|admin'])->group(function () {
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+        Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
     });
 
     Route::middleware(['auth', 'role:manager'])->group(function () {
