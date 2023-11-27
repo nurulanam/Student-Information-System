@@ -73,24 +73,24 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form action="{{ route('programs.store') }}" method="post">
+                            <form action="{{ route('enrollments.store') }}" method="post">
                                 @csrf
                                 <div class="mb-3">
                                     <label for="studentId" class="form-label">Student Id<span class="text-danger">*</span></label>
-                                    <input type="text" name="std_id" class="form-control" value="{{ old('std_id') }}" id="studentId"  placeholder="ST0000000" required>
-                                    @error('std_id')
+                                    <input type="text" name="student_id" class="form-control" value="{{ old('student_id') }}" id="studentId"  placeholder="ST0000000" required>
+                                    @error('student_id')
                                         <p class="text-danger">{{  $message }}</p>
                                     @enderror
                                 </div>
                                 <div class="mb-3">
                                     <label for="programId" class="form-label">Program <span class="text-danger">*</span></label>
-                                    <select name="program" class="form-control" id="programId" required>
+                                    <select name="program_id" class="form-control" id="programId" required>
                                         <option value="" selected>Select Program</option>
                                         @foreach ($programs as $program )
                                             <option value="{{ $program->id }}" @if (old('program_id') === $program->id) @endif>{{ $program->name }}</option>
                                         @endforeach
                                     </select>
-                                    @error('program')
+                                    @error('program_id')
                                         <p class="text-danger">{{  $message }}</p>
                                     @enderror
                                 </div>
@@ -102,52 +102,75 @@
                                     @enderror
                                 </div>
                                 <div class="mb-3">
+                                    <label  class="form-label" for="paymentOption">Payment Option <span class="text-danger">*</span></label>
+                                    <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="payment_option" value="full" id="paymentOptionFull" checked required>
+                                            <label class="form-check-label" for="paymentOptionFull">
+                                                Full Payment
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="payment_option" value="upfront" id="paymentOptionUpFront" checked required>
+                                            <label class="form-check-label" for="paymentOptionUpFront">
+                                                Up Front
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="payment_option" value="installment" id="paymentOptionInstallment">
+                                            <label class="form-check-label" for="paymentOptionInstallment">
+                                                Installments
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3" id="installmentDetails">
                                     <label for="totalInstallment" class="form-label">Installments <span class="text-danger">*</span></label>
                                     <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="total_installment" value="1" id="totalInstallment1">
+                                            <input class="form-check-input" type="radio" name="total_installment" value="1" id="totalInstallment1" data-full-payment-field>
                                             <label class="form-check-label" for="totalInstallment1">
                                              1
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="total_installment" value="2" id="totalInstallment2">
+                                            <input class="form-check-input" type="radio" name="total_installment" value="2" id="totalInstallment2" data-full-payment-field>
                                             <label class="form-check-label" for="totalInstallment2">
                                              2
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="total_installment" value="3" id="totalInstallment3">
+                                            <input class="form-check-input" type="radio" name="total_installment" value="3" id="totalInstallment3" data-full-payment-field>
                                             <label class="form-check-label" for="totalInstallment3">
                                              3
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="total_installment" value="4" id="totalInstallment4">
+                                            <input class="form-check-input" type="radio" name="total_installment" value="4" id="totalInstallment4" data-full-payment-field>
                                             <label class="form-check-label" for="totalInstallment4">
                                              4
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="total_installment" value="5" id="totalInstallment5">
+                                            <input class="form-check-input" type="radio" name="total_installment" value="5" id="totalInstallment5" data-full-payment-field>
                                             <label class="form-check-label" for="totalInstallment5">
                                              5
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="total_installment" value="6" id="totalInstallment6">
+                                            <input class="form-check-input" type="radio" name="total_installment" value="6" id="totalInstallment6" data-full-payment-field>
                                             <label class="form-check-label" for="totalInstallment6">
                                              6
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="total_installment" value="7" id="totalInstallment7">
+                                            <input class="form-check-input" type="radio" name="total_installment" value="7" id="totalInstallment7" data-full-payment-field>
                                             <label class="form-check-label" for="totalInstallment7">
                                              7
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="total_installment" value="8" id="totalInstallment8">
+                                            <input class="form-check-input" type="radio" name="total_installment" value="8" id="totalInstallment8" data-full-payment-field>
                                             <label class="form-check-label" for="totalInstallment8">
                                              8
                                             </label>
@@ -214,4 +237,65 @@
             </div>
         </div>
     </div>
+
+
+@endsection
+@section('extraJs')
+<script>
+    window.addEventListener('load', () => {
+        const paymentOptionRadios = document.querySelectorAll('input[name="payment_option"]');
+        let selectedOption = null;
+
+        for (const paymentOptionRadio of paymentOptionRadios) {
+            if (paymentOptionRadio.checked) {
+            selectedOption = paymentOptionRadio.value;
+            }
+
+            paymentOptionRadio.addEventListener('change', (event) => {
+                const paymentOptionValue = event.target.value;
+                console.log(paymentOptionValue);
+
+                if (paymentOptionValue === 'full' || paymentOptionValue == "upfront") {
+                    // Handle full payment option
+                    handleFullPayment();
+                } else if (paymentOptionValue === 'installment') {
+                    // Handle installment option
+                    handleInstallment();
+                }
+            });
+        }
+
+        if (selectedOption === 'full' || selectedOption === 'upfront') {
+            handleFullPayment();
+        } else if (selectedOption === 'installment') {
+            handleInstallment();
+        }
+        });
+
+    function handleFullPayment() {
+        // Disable installment details section
+        const installmentDetailsElement = document.getElementById('installmentDetails');
+        installmentDetailsElement.style.display = 'none';
+
+        // Enable full payment fields
+        const fullPaymentFields = document.querySelectorAll('[data-full-payment-field]');
+        for (const fullPaymentField of fullPaymentFields) {
+            fullPaymentField.disabled = true;
+        }
+    }
+
+    function handleInstallment() {
+        // Show installment details section
+        const installmentDetailsElement = document.getElementById('installmentDetails');
+        installmentDetailsElement.style.display = 'block'; // Change this line
+
+        // Disable full payment fields
+        const fullPaymentFields = document.querySelectorAll('[data-full-payment-field]');
+        for (const fullPaymentField of fullPaymentFields) {
+            fullPaymentField.disabled = false;
+        }
+    }
+
+
+</script>
 @endsection

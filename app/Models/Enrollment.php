@@ -12,6 +12,7 @@ class Enrollment extends Model
         "student_id",
         "program_id",
         "total_cost",
+        "payment_mode",
         "total_installment",
         "installment_completed",
         "status",

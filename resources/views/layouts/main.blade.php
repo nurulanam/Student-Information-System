@@ -41,7 +41,7 @@
   <script src="../assets/libs/simplebar/dist/simplebar.js"></script>
   <script src="../assets/js/dashboard.js"></script>
 
-
+  @yield('extraJs')
 </body>
 
 </html>

@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('enrollment_id');
-            $table->integer('installment_number');
+            $table->boolean('is_installment')->nullable();
+            $table->integer('upfront_payment_amount')->nullable();
+            $table->integer('installment_number')->nullable();
             $table->decimal('amount_paid', 8, 2);
             $table->string('payment_type')->comment('cash, bank_transfer, direct_debit, credit_card');
             $table->text('notes')->nullable();

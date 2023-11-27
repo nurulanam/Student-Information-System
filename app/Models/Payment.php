@@ -10,6 +10,8 @@ class Payment extends Model
     use HasFactory;
     protected $fillable = [
         "enrollment_id",
+        "is_installment",
+        "upfront_payment_amount",
         "installment_number",
         "amount_paid",
         "payment_type",
