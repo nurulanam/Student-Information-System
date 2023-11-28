@@ -18,9 +18,11 @@ class EnrollmentController extends Controller
     {
         $title = 'Change Status!';
         $text = "Are you sure to change status?";
-
+        confirmDelete($title, $text);
+        
+        $enrollments = Enrollment::with(['student', 'program'])->paginate(20);
         $programs = Program::all();
-        return view("enrollments", compact("programs"));
+        return view("enrollments", compact("enrollments", "programs"));
     }
 
     public function store(Request $request): RedirectResponse
@@ -69,7 +71,6 @@ class EnrollmentController extends Controller
                 $payment->save();
             }
 
-
             // Update enrollment status for full payment
             if (isset($payment)) {
                 $enrollment->status = 'active';
@@ -82,7 +83,6 @@ class EnrollmentController extends Controller
             }else{
                 Alert::error('Error', "Payment error.");
             }
-
             return redirect()->route('enrollments.index');
         }
 

@@ -30,19 +30,19 @@
                         <thead class="text-dark fs-4">
                         <tr>
                             <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Invoice</h6>
-                            </th>
-                            <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0">Student Id</h6>
                             </th>
                             <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0">Program</h6>
                             </th>
                             <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Payment Mode</h6>
+                            </th>
+                            <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0">Total Cost</h6>
                             </th>
                             <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">Installments</h6>
+                            <h6 class="fw-semibold mb-0">Total Paid</h6>
                             </th>
                             <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0">Status</h6>
@@ -50,20 +50,46 @@
                         </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td class="border-bottom-0">In1234568</td>
-                                <td class="border-bottom-0">St1232345543</td>
-                                <td class="border-bottom-0">Php with Laravel</td>
-                                <td class="border-bottom-0">500</td>
-                                <td class="border-bottom-0">5</td>
-                                <td class="border-bottom-0">
-                                    <span class="badge bg-success"><i class="ti ti-arrow-up"></i></span>
-                                </td>
-                            </tr>
+                            @foreach ($enrollments as $enrollment)
+                                <tr>
+                                    <td class="border-bottom-0">{{ $enrollment->student->std_id }}</td>
+                                    <td class="border-bottom-0">{{ $enrollment->program->name }}</td>
+                                    <td class="border-bottom-0">
+                                        @if ($enrollment->payment_mode === 'full')
+                                            Full Paid
+                                        @elseif ($enrollment->payment_mode === 'upfront')
+                                            Up Front
+                                        @elseif ($enrollment->payment_mode === 'installment')
+                                            Installment
+                                        @endif
+                                    </td>
+                                    <td class="border-bottom-0">{{ $enrollment->total_cost}}</td>
+                                    <td class="border-bottom-0">{{ $enrollment->total_paid}}</td>
+                                    <td class="border-bottom-0">
+                                        @if ($enrollment->status === 'active')
+                                            <a href="#" class="badge bg-success" data-confirm-delete="true"><i class="ti ti-arrow-up"></i></a>
+                                        @elseif($enrollment->status === 'disable')
+                                            <a href="#" class="badge bg-danger" ><i class="ti ti-arrow-down"></i></a>
+                                        @endif
+                                        {{-- <form id="updateEnrollmentForm" action="{{ route('enrollments.update') }}" method="POST">
+                                            @csrf
+                                            <!-- Your form fields go here -->
+                                            <div class="d-none">
+                                                <input type="number" name="id" value="{{  }}" >
+                                            </div>
+
+                                            <!-- Add a confirm button -->
+                                            <button type="button" id="confirmUpdateBtn" class="btn btn-primary">Update</button>
+                                        </form> --}}
+                                    </td>
+                                </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
             </div>
+
+
             {{-- modal  --}}
             <div class="modal fade" id="addEnrollment" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -297,5 +323,28 @@
     }
 
 
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add a click event listener to the confirm button
+        document.getElementById('confirmUpdateBtn').addEventListener('click', function () {
+            // Show a SweetAlert confirmation dialog
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You won\'t be able to revert this!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, update it!'
+            }).then((result) => {
+                // If the user clicks "Yes"
+                if (result.isConfirmed) {
+                    // Submit the form
+                    document.getElementById('updateEnrollmentForm').submit();
+                }
+            });
+        });
+    });
 </script>
 @endsection

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
@@ -11,7 +12,8 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        return view('payments');
+        $payments = Payment::paginate(20);
+        return view('payments', compact('payments'));
     }
 
     /**

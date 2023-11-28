@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Enrollment;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Payment extends Model
 {
@@ -17,4 +18,9 @@ class Payment extends Model
         "payment_type",
         "notes",
     ] ;
+
+    public function enrollment()
+    {
+        return $this->belongsTo(Enrollment::class);
+    }
 }

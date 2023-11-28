@@ -13,6 +13,7 @@
 <body>
     <script src="{{ asset('/vendor/sweetalert/sweetalert.all.js') }}"></script>
     @include('sweetalert::alert')
+
   <!--  Body Wrapper -->
   <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
     data-sidebar-position="fixed" data-header-position="fixed">
