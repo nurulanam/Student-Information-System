@@ -1,6 +1,19 @@
 @extends('layouts.main')
 @section('title', 'Enrollments')
 @section('content')
+<style>
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+    </style>
     <div class="row">
         <div class="col-12">
             <div class="card w-100">
@@ -137,7 +150,7 @@
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="payment_option" value="upfront" id="paymentOptionUpFront" checked required>
+                                            <input class="form-check-input" type="radio" name="payment_option" value="upfront" id="paymentOptionUpFront" required>
                                             <label class="form-check-label" for="paymentOptionUpFront">
                                                 Up Front
                                             </label>
@@ -238,12 +251,24 @@
                                         <p class="text-danger">{{  $message }}</p>
                                     @enderror
                                 </div>
-                                <div class="mb-3">
-                                    <label for="amountPaid" class="form-label">Paid Amount <span class="text-danger">*</span></label>
-                                    <input type="number" name="amount_paid" class="form-control" id="amountPaid" value="{{ old('details') }}" required>
+                                <div class="mb-3" id="amountPaid">
+                                    <label for="amount_paid" class="form-label">Paid Amount <span class="text-danger">*</span></label>
+                                    <input type="number" name="amount_paid" class="form-control" id="amount_paid" value="{{ old('amount_paid') }}" required>
                                     @error('amount_paid')
                                         <p class="text-danger">{{  $message }}</p>
                                     @enderror
+                                </div>
+                                <div class="calculation mb-3">
+                                    <hr>
+                                    <div class="d-flex justify-content-between items-center mb-1">
+                                        <p><b>Per Installment</b></p>
+                                        <p class="text-end" id="perInstallment">0</p>
+                                    </div>
+                                    <div class="d-flex justify-content-between items-center mb-1">
+                                        <p><b>Due</b></p>
+                                        <p class="text-end" id="totalDue">0</p>
+                                    </div>
+
                                 </div>
                                 <div class="mb-3">
                                     <label for="notes" class="form-label">Notes</label>
@@ -267,64 +292,7 @@
 
 @endsection
 @section('extraJs')
-<script>
-    window.addEventListener('load', () => {
-        const paymentOptionRadios = document.querySelectorAll('input[name="payment_option"]');
-        let selectedOption = null;
-
-        for (const paymentOptionRadio of paymentOptionRadios) {
-            if (paymentOptionRadio.checked) {
-            selectedOption = paymentOptionRadio.value;
-            }
-
-            paymentOptionRadio.addEventListener('change', (event) => {
-                const paymentOptionValue = event.target.value;
-                console.log(paymentOptionValue);
-
-                if (paymentOptionValue === 'full' || paymentOptionValue == "upfront") {
-                    // Handle full payment option
-                    handleFullPayment();
-                } else if (paymentOptionValue === 'installment') {
-                    // Handle installment option
-                    handleInstallment();
-                }
-            });
-        }
-
-        if (selectedOption === 'full' || selectedOption === 'upfront') {
-            handleFullPayment();
-        } else if (selectedOption === 'installment') {
-            handleInstallment();
-        }
-        });
-
-    function handleFullPayment() {
-        // Disable installment details section
-        const installmentDetailsElement = document.getElementById('installmentDetails');
-        installmentDetailsElement.style.display = 'none';
-
-        // Enable full payment fields
-        const fullPaymentFields = document.querySelectorAll('[data-full-payment-field]');
-        for (const fullPaymentField of fullPaymentFields) {
-            fullPaymentField.disabled = true;
-        }
-    }
-
-    function handleInstallment() {
-        // Show installment details section
-        const installmentDetailsElement = document.getElementById('installmentDetails');
-        installmentDetailsElement.style.display = 'block'; // Change this line
-
-        // Disable full payment fields
-        const fullPaymentFields = document.querySelectorAll('[data-full-payment-field]');
-        for (const fullPaymentField of fullPaymentFields) {
-            fullPaymentField.disabled = false;
-        }
-    }
-
-
-</script>
-<script>
+{{-- <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Add a click event listener to the confirm button
         document.getElementById('confirmUpdateBtn').addEventListener('click', function () {
@@ -346,5 +314,119 @@
             });
         });
     });
+</script> --}}
+
+<script>
+    window.addEventListener('load', () => {
+        const paymentOptionRadios = document.querySelectorAll('input[name="payment_option"]');
+        const totalCostInput = document.getElementById('totalCost');
+        const amountPaidInput = document.getElementById('amount_paid');
+        const totalInstallmentRadios = document.querySelectorAll('input[name="total_installment"]');
+        const perInstallmentElement = document.getElementById('perInstallment');
+        const totalDueElement = document.getElementById('totalDue');
+        const amountPaidDiv = document.getElementById('amountPaid');
+        const installmentDetailsDiv = document.getElementById('installmentDetails');
+        const fullPaymentFields = document.querySelectorAll('[data-full-payment-field]');
+
+        function updateCalculations() {
+            const totalCost = parseFloat(totalCostInput.value) || 0;
+            let amountPaid = parseFloat(amountPaidInput.value) || 0;
+            const selectedOption = getSelectedPaymentOption();
+
+            if (selectedOption === 'installment' || selectedOption === 'upfront') {
+                const totalInstallmentRadio = document.querySelector('input[name="total_installment"]:checked');
+                const totalInstallments = totalInstallmentRadio ? totalInstallmentRadio.value : 1;
+
+                let perInstallment = totalCost / totalInstallments;
+                perInstallmentElement.innerText = perInstallment.toFixed(2);
+
+                if (selectedOption === 'upfront') {
+                    const remainingAmount = totalCost - amountPaid;
+                    totalDueElement.innerText = remainingAmount.toFixed(2);
+                    amountPaid = 0;
+                    amountPaidInput.disabled = false;
+                    amountPaidInput.readOnly = false;
+                    amountPaidDiv.style.display = 'block';
+                    installmentDetailsDiv.style.display = 'block';
+
+                    // Calculate perInstallment based on the remaining amount
+                    if (totalInstallments > 0) {
+                        perInstallment = remainingAmount / totalInstallments;
+                        perInstallmentElement.innerText = perInstallment.toFixed(2);
+                    }
+                } else {
+                    totalDueElement.innerText = totalCost.toFixed(2);
+                    amountPaidInput.disabled = true;
+                    amountPaidInput.readOnly = true;
+                    amountPaidDiv.style.display = 'none';
+                    installmentDetailsDiv.style.display = 'block';
+                }
+
+                for (const fullPaymentField of fullPaymentFields) {
+                    fullPaymentField.disabled = false;
+                }
+            } else if (selectedOption === 'full') {
+                amountPaidInput.value = totalCost.toFixed(2);
+                perInstallmentElement.innerText = '0.00';
+                totalDueElement.innerText = '0.00';
+                amountPaidInput.disabled = false;
+                amountPaidInput.readOnly = true;
+                amountPaidDiv.style.display = 'block';
+                installmentDetailsDiv.style.display = 'none';
+                for (const fullPaymentField of fullPaymentFields) {
+                    fullPaymentField.disabled = true;
+                }
+            }
+        }
+
+        function getSelectedPaymentOption() {
+            for (const paymentOptionRadio of paymentOptionRadios) {
+                if (paymentOptionRadio.checked) {
+                    return paymentOptionRadio.value;
+                }
+            }
+            return null;
+        }
+
+        function handleInstallment() {
+            updateCalculations();
+        }
+
+        function handleFullPayment() {
+            updateCalculations();
+        }
+
+        for (const paymentOptionRadio of paymentOptionRadios) {
+            paymentOptionRadio.addEventListener('change', () => {
+                const selectedOption = getSelectedPaymentOption();
+                if (selectedOption === 'installment' || selectedOption === 'upfront') {
+                    updateCalculations();
+                } else if (selectedOption === 'full') {
+                    handleFullPayment();
+                }
+            });
+        }
+
+        totalCostInput.addEventListener('keyup', updateCalculations);
+        amountPaidInput.addEventListener('keyup', updateCalculations);
+
+        for (const totalInstallmentRadio of totalInstallmentRadios) {
+            totalInstallmentRadio.addEventListener('change', updateCalculations);
+        }
+
+        // Initial setup based on default selected payment option
+        const initialOption = getSelectedPaymentOption();
+        if (initialOption === 'installment' || initialOption === 'upfront') {
+            updateCalculations();
+        } else if (initialOption === 'full') {
+            handleFullPayment();
+        }
+    });
 </script>
+
+
+
+
+
+
 @endsection
