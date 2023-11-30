@@ -50,11 +50,15 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
     });
 
     Route::middleware(['auth', 'role:manager|finance|admin'])->group(function () {
-        Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
-
         Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
         Route::post('/enrollments/store', [EnrollmentController::class, 'store'])->name('enrollments.store');
         Route::post('/enrollments/update', [EnrollmentController::class, 'update'])->name('enrollments.update');
+
+        // payment
+        Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+        Route::post('/payments/store', [PaymentController::class, 'store'])->name('payments.store');
+        Route::post('/payments/find-enrollment', [PaymentController::class, 'findEnrollment'])->name('payments.find.enrollment');
+
     });
 
     Route::middleware(['auth', 'role:manager'])->group(function () {

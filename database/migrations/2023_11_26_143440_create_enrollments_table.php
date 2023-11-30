@@ -18,9 +18,10 @@ return new class extends Migration
             $table->integer('total_cost')->nullable();
             $table->string('payment_mode')->nullable()->comment('full, upfront, installment');
             $table->integer('total_installment')->nullable();
-            $table->integer('installment_completed')->nullable();
+            $table->integer('installment_completed')->default(0);
             $table->decimal('total_paid', 8, 2)->default(0);
             $table->string('status')->default('disable')->comment('active, disable');
+            $table->text('notes')->nullable();
             $table->timestamps();
 
             $table->foreign('student_id')->references('id')->on('students');

@@ -1,4 +1,8 @@
 @extends('layouts.main')
+@section('extraMeta')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
+@section('title', 'Payments')
 @section('content')
 <div class="row">
     <div class="col-12">
@@ -9,7 +13,7 @@
                     <a href="{{ route('enrollments.index') }}" class="btn btn-danger order-1 order-md-0"><i class="ti ti-reload"></i></a>
                     <form action="{{ route('enrollments.index') }}" method="get" class="order-0 order-md-1">
                         <div class="d-flex flex-wrap flex-md-nowrap  align-items-center">
-                            <input type="text" name="search" class="form-control" placeholder="Search by Invoice or Student id" aria-describedby="search">
+                            <input type="text" name="search" class="form-control" placeholder="Search by Enrollment Id" aria-describedby="search">
                             <span class="d-flex align-items-center gap-2 ms-2">
                                 <label for="" class="label flex-shrink-0">To</label>
                                 <input type="date" name="to_date" class="form-control" placeholder="From Date" aria-describedby="todate">
@@ -21,33 +25,33 @@
                             <button class="btn btn-primary ms-2"id="search"><i class="ti ti-search"></i></button>
                         </div>
                     </form>
-                    <button type="button" class="btn btn-primary order-2 order-md-2" data-bs-toggle="modal" data-bs-target="#addEnrollment"><span class="me-2"><i class="ti ti-user-plus"></i></span>Enroll</button>
+                    <button type="button" class="btn btn-primary order-2 order-md-2" data-bs-toggle="modal" data-bs-target="#addPayment"><span class="me-2"><i class="ti ti-file"></i></span>Pay Installment</button>
                 </div>
             </div>
             <div class="card-body p-2 overflow-x-scroll">
                 <table class="table table-borderless text-nowrap table-hover mb-0 align-middle">
                     <thead class="text-dark fs-4">
                     <tr>
-                        <th class="border-bottom-0">
-                        <h6 class="fw-semibold mb-0">Enroll Id</h6>
+                        <th>
+                            <h6 class="fw-semibold mb-0">Enroll Id</h6>
                         </th>
-                        <th class="border-bottom-0">
-                        <h6 class="fw-semibold mb-0">Installment</h6>
+                        <th>
+                            <h6 class="fw-semibold mb-0">Installment</h6>
                         </th>
-                        <th class="border-bottom-0">
-                        <h6 class="fw-semibold mb-0">Upfron Amount</h6>
+                        <th>
+                            <h6 class="fw-semibold mb-0">Installment No</h6>
                         </th>
-                        <th class="border-bottom-0">
-                        <h6 class="fw-semibold mb-0">installment_number</h6>
+                        <th>
+                            <h6 class="fw-semibold mb-0">Amount</h6>
                         </th>
-                        <th class="border-bottom-0">
-                        <h6 class="fw-semibold mb-0">amount_paid</h6>
+                        <th>
+                            <h6 class="fw-semibold mb-0">Payment Type</h6>
                         </th>
-                        <th class="border-bottom-0">
-                        <h6 class="fw-semibold mb-0">payment_type</h6>
+                        <th>
+                            <h6 class="fw-semibold mb-0">Notes</h6>
                         </th>
-                        <th class="border-bottom-0">
-                        <h6 class="fw-semibold mb-0">notes</h6>
+                        <th>
+                            <h6 class="fw-semibold mb-0">Action</h6>
                         </th>
                     </tr>
                     </thead>
@@ -55,12 +59,18 @@
                         @foreach ($payments as $payment)
                             <tr>
                                 <td>{{ $payment->enrollment_id }}</td>
-                                <td>{{ $payment->is_installment }}</td>
-                                <td>{{ $payment->upfront_payment_amount }}</td>
-                                <td>{{ $payment->installment_number }}</td>
+                                <td>
+                                    @if ($payment->is_installment === 1)
+                                        <span class="badge bg-primary">True</span>
+                                    @else
+                                        <span class="badge bg-danger">False</span>
+                                    @endif
+                                </td>
+                                <td><span class="badge bg-primary">{{ $payment->installment_number }}</span></td>
                                 <td>{{ $payment->amount_paid }}</td>
                                 <td>{{ $payment->payment_type }}</td>
                                 <td>{{ $payment->notes }}</td>
+                                <td></td>
                             </tr>
                         @endforeach
 
@@ -68,6 +78,142 @@
                 </table>
             </div>
         </div>
+
+        <div class="modal fade" id="addPayment" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Pay Installment</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- resources/views/installments/create.blade.php -->
+
+                    <form action="{{ route('payments.store') }}" method="post">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="enrollmentId" class="form-label">Enrollment Id<span class="text-danger">*</span></label>
+                            <input type="number" name="enrollment_id" class="form-control" id="enrollmentId" required>
+                            @error('enrollment_id')
+                                <p class="text-danger">{{  $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="installmentAmount" class="form-label">Installment Amount<span class="text-danger">*</span></label>
+                            <input type="number" name="amount_paid" class="form-control" id="installmentAmount" required>
+                        </div>
+                        @error('amount_paid')
+                            <p class="text-danger">{{  $message }}</p>
+                        @enderror
+
+                        <div class="mb-3">
+                            <label for="paymentType" class="form-label">Payment Type <span class="text-danger">*</span></label>
+                            <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_type" value="cash" id="paymentType1">
+                                    <label class="form-check-label" for="paymentType1">
+                                        Cash
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_type" value="bank_transfer" id="paymentType2">
+                                    <label class="form-check-label" for="paymentType2">
+                                        Bank Transfer
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_type" value="direct_debit" id="paymentType3">
+                                    <label class="form-check-label" for="paymentType3">
+                                        Direct Debit
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_type" value="credit_card" id="paymentType4">
+                                    <label class="form-check-label" for="paymentType4">
+                                        Credit Card
+                                    </label>
+                                </div>
+                            </div>
+                            @error('payment_type')
+                                <p class="text-danger">{{  $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea name="notes" class="form-control" id="notes" rows="2"></textarea>
+                            @error('notes')
+                                <p class="text-danger">{{  $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="d-flex justify-content-end align-items-center gap-2">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                            <button class="btn btn-primary">Pay Installment</button>
+                        </div>
+                    </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+@endsection
+@section('extraJs')
+<script>
+    $(document).ready(function () {
+        // Initial AJAX request on page load
+        if ($('#enrollmentId').val()) {
+            fetchEnrollmentData();
+        }
+
+        var timer;
+
+        // Attach the event handler for keyup and change on #enrollmentId
+        $('#enrollmentId').on('keyup change', function () {
+            // Clear previous timer
+            clearTimeout(timer);
+            if ($('#enrollmentId').val()) {
+                timer = setTimeout(function () {
+                    fetchEnrollmentData();
+                }, 500);
+            }else{
+                $('#installmentAmount').val(' ');
+            }
+        });
+
+        function fetchEnrollmentData() {
+            var enrollmentId = $('#enrollmentId').val();
+
+            // Set the CSRF token value
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            // Make an AJAX request
+            $.ajax({
+                type: 'POST',
+                url: '/dashboard/payments/find-enrollment',
+                data: {
+                    enrollmentId: enrollmentId,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    var perInstallment = data.total_cost;
+
+                    $('#installmentAmount').val(perInstallment);
+                },
+                error: function (error) {
+                    $('#installmentAmount').val(' ');
+                    // console.error('Error fetching data:', error.responseText);
+                }
+            });
+        }
+    });
+</script>
+
 @endsection

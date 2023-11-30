@@ -19,7 +19,7 @@ class EnrollmentController extends Controller
         $title = 'Change Status!';
         $text = "Are you sure to change status?";
         confirmDelete($title, $text);
-        
+
         $enrollments = Enrollment::with(['student', 'program'])->paginate(20);
         $programs = Program::all();
         return view("enrollments", compact("enrollments", "programs"));
@@ -32,9 +32,8 @@ class EnrollmentController extends Controller
             'program_id' => 'required|exists:programs,id',
             'total_cost' => 'required|integer|min:0',
             'payment_option' => 'required|in:full,upfront,installment',
-            'total_installment' => 'nullable|integer|min:1|max:12', // Assuming maximum of 12 installments
-            'installment_completed' => 'nullable|integer|min:0|max:total_installment',
-            'amount_paid' => 'nullable|numeric|min:0',
+            'total_installment' => 'required_if:payment_option,in:installment,upfront|integer|min:1',
+            'amount_paid' => 'required_if:payment_option,in:full,upfront',
             'payment_type' => 'required|in:cash,bank_transfer,direct_debit,credit_card',
             'notes' => 'nullable|string',
         ]);
@@ -55,36 +54,45 @@ class EnrollmentController extends Controller
                 $enrollment->total_cost = $request->total_cost;
                 $enrollment->payment_mode = $request->payment_option;
                 $enrollment->total_installment = $request->total_installment;
-                $enrollment->installment_completed = 0;
-                $enrollment->status = 'disable';
                 $enrollment->save();
 
-                // Create payment record
-                $payment = new Payment;
-                $payment->enrollment_id = $enrollment->id;
-                $payment->is_installment = $request->payment_option === 'installment' ? true : false;
-                $payment->upfront_payment_amount = $request->payment_option === 'upfront' ? $request->amount_paid : null;
-                $payment->installment_number = $request->installment_number;
-                $payment->amount_paid = $request->amount_paid;
-                $payment->payment_type = $request->payment_type;
-                $payment->notes = $request->notes;
-                $payment->save();
-            }
+                if (strtolower($enrollment->payment_mode) === 'full' || strtolower($enrollment->payment_mode) === 'upfront') {
+                    $payment = $this->handlePayments($enrollment, $request);
+                    if ($payment !== false) {
+                        $enrollment->update(['status' => 'active']);
 
-            // Update enrollment status for full payment
-            if (isset($payment)) {
-                $enrollment->status = 'active';
-                $enrollment->update();
-                if ($request->payment_option === 'upfront') {
-                    $enrollment->total_paid = $request->amount_paid;
-                    $enrollment->update();
+                        Alert::success('Success', "Enrollment active successfully.");
+                        return redirect()->route('enrollments.index');
+                    }else{
+                        $enrollment->delete();
+                        Alert::error('Error', "Payment Failed.");
+                        return redirect()->route('enrollments.index');
+                    }
+                }elseif($enrollment->payment_mode === 'installment'){
+                    $enrollment->update([
+                        'installment_completed' => 0,
+                        'status' => 'active'
+                    ]);
+                    Alert::success('Success', "Enrollment active successfully.");
+                    return redirect()->route('enrollments.index');
                 }
-                Alert::success('Success', "Enrollment active successfully.");
-            }else{
-                Alert::error('Error', "Payment error.");
+
             }
-            return redirect()->route('enrollments.index');
         }
 
+    }
+
+
+    private function handlePayments(Enrollment $enrollment, Request $request)
+    {
+        // For full or upfront payment, create a single payment record
+        $payment = Payment::create([
+            'enrollment_id' => $enrollment->id,
+            'amount_paid' => $request->amount_paid,
+            'payment_type' => $request->payment_type,
+            'notes' => $request->notes,
+        ]);
+        $enrollment->increment('total_paid', $request->amount_paid);
+        return $payment;
     }
 }

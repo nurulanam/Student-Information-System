@@ -39,7 +39,7 @@
                     </div>
                 </div>
                 <div class="card-body p-2 overflow-x-scroll">
-                    <table class="table text-nowrap table-hover mb-0 align-middle">
+                    <table class="table text-nowrap table-borderless table-hover mb-0 align-middle">
                         <thead class="text-dark fs-4">
                         <tr>
                             <th class="border-bottom-0">
@@ -56,6 +56,12 @@
                             </th>
                             <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0">Total Paid</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Total Installments</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Paid Installments</h6>
                             </th>
                             <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0">Status</h6>
@@ -78,6 +84,8 @@
                                     </td>
                                     <td class="border-bottom-0">{{ $enrollment->total_cost}}</td>
                                     <td class="border-bottom-0">{{ $enrollment->total_paid}}</td>
+                                    <td class="border-bottom-0">{{ $enrollment->total_installment}}</td>
+                                    <td class="border-bottom-0">{{ $enrollment->installment_completed}}</td>
                                     <td class="border-bottom-0">
                                         @if ($enrollment->status === 'active')
                                             <a href="#" class="badge bg-success" data-confirm-delete="true"><i class="ti ti-arrow-up"></i></a>
