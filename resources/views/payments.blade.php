@@ -58,7 +58,7 @@
                     <tbody>
                         @foreach ($payments as $payment)
                             <tr>
-                                <td>{{ $payment->enrollment_id }}</td>
+                                <td>{{ $payment->enrollment->enroll_id }}</td>
                                 <td>
                                     @if ($payment->is_installment === 1)
                                         <span class="badge bg-primary">True</span>
@@ -93,7 +93,7 @@
                         @csrf
                         <div class="mb-3">
                             <label for="enrollmentId" class="form-label">Enrollment Id<span class="text-danger">*</span></label>
-                            <input type="number" name="enrollment_id" class="form-control" id="enrollmentId" required>
+                            <input type="text" name="enrollment_id" class="form-control" id="enrollmentId" required>
                             @error('enrollment_id')
                                 <p class="text-danger">{{  $message }}</p>
                             @enderror
@@ -101,7 +101,10 @@
 
                         <div class="mb-3">
                             <label for="installmentAmount" class="form-label">Installment Amount<span class="text-danger">*</span></label>
-                            <input type="number" name="amount_paid" class="form-control" id="installmentAmount" required>
+                            <input type="number" name="amount_paid" class="form-control" id="installmentAmount" required readonly>
+                        </div>
+                        <div class="mb-3" id="returnMessageBox">
+                            <p id="returnMessage">test</p>
                         </div>
                         @error('amount_paid')
                             <p class="text-danger">{{  $message }}</p>
@@ -150,7 +153,7 @@
 
                         <div class="d-flex justify-content-end align-items-center gap-2">
                             <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
-                            <button class="btn btn-primary">Pay Installment</button>
+                            <button class="btn btn-primary" id="PayInstallmentBtn">Pay Installment</button>
                         </div>
                     </form>
 
@@ -174,7 +177,6 @@
         // Attach the event handler for keyup and change on #enrollmentId
         $('#enrollmentId').on('keyup change', function () {
             // Clear previous timer
-            clearTimeout(timer);
             if ($('#enrollmentId').val()) {
                 timer = setTimeout(function () {
                     fetchEnrollmentData();
@@ -186,6 +188,7 @@
 
         function fetchEnrollmentData() {
             var enrollmentId = $('#enrollmentId').val();
+            console.log(enrollmentId);
 
             // Set the CSRF token value
             $.ajaxSetup({
@@ -203,12 +206,35 @@
                 },
                 dataType: 'json',
                 success: function (data) {
-                    var perInstallment = data.total_cost;
+                    var installmentAmount = data.installment_amount;
+                    var message = data.message;
 
-                    $('#installmentAmount').val(perInstallment);
+                    $('#installmentAmount').val(installmentAmount);
+                    if (data.success) {
+                        $('#returnMessage').text(message);
+                        $('#returnMessage').removeClass('text-danger');
+                        $('#returnMessage').addClass('text-dark');
+                        $('#returnMessageBox').show();
+
+                        $('#PayInstallmentBtn').removeAttr('type');
+                        $('#PayInstallmentBtn').prop('disabled', false);
+                    } else {
+                        $('#returnMessage').text(message);
+                        $('#returnMessage').removeClass('text-dark');
+                        $('#returnMessage').addClass('text-danger');
+                        $('#returnMessageBox').show();
+
+                        $('#PayInstallmentBtn').attr('type', 'button');
+                        $('#PayInstallmentBtn').prop('disabled', true);
+
+                    }
                 },
                 error: function (error) {
                     $('#installmentAmount').val(' ');
+                    $('#returnMessageBox').hide();
+
+                    $('#PayInstallmentBtn').removeAttr('type');
+                    $('#PayInstallmentBtn').prop('disabled', false);
                     // console.error('Error fetching data:', error.responseText);
                 }
             });

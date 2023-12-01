@@ -43,6 +43,9 @@
                         <thead class="text-dark fs-4">
                         <tr>
                             <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Enroll Id</h6>
+                            </th>
+                            <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0">Student Id</h6>
                             </th>
                             <th class="border-bottom-0">
@@ -53,6 +56,9 @@
                             </th>
                             <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0">Total Cost</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Upfornt</h6>
                             </th>
                             <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0">Total Paid</h6>
@@ -71,6 +77,7 @@
                         <tbody>
                             @foreach ($enrollments as $enrollment)
                                 <tr>
+                                    <td class="border-bottom-0">{{ $enrollment->enroll_id }}</td>
                                     <td class="border-bottom-0">{{ $enrollment->student->std_id }}</td>
                                     <td class="border-bottom-0">{{ $enrollment->program->name }}</td>
                                     <td class="border-bottom-0">
@@ -83,6 +90,7 @@
                                         @endif
                                     </td>
                                     <td class="border-bottom-0">{{ $enrollment->total_cost}}</td>
+                                    <td class="border-bottom-0">{{ $enrollment->upfront_paid}}</td>
                                     <td class="border-bottom-0">{{ $enrollment->total_paid}}</td>
                                     <td class="border-bottom-0">{{ $enrollment->total_installment}}</td>
                                     <td class="border-bottom-0">{{ $enrollment->installment_completed}}</td>

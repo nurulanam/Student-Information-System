@@ -26,7 +26,7 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $validation = Validator::make($request->all(), [
-            'enrollment_id' => 'required|exists:enrollments,id',
+            'enrollment_id' => 'required|exists:enrollments,enroll_id',
             'amount_paid' => 'required|numeric|min:0',
             'payment_type' => 'required|in:cash,bank_transfer,direct_debit,credit_card',
             'notes' => 'nullable|string',
@@ -39,10 +39,21 @@ class PaymentController extends Controller
         }
         else
         {
-            $enrollment = Enrollment::findOrFail($request->enrollment_id);
+            $enrollment = Enrollment::where('enroll_id',$request->enrollment_id)->first();
             if (isset($enrollment)){
+                $installment_amount = 0;
+
+                if($enrollment->payment_mode == 'upfront'){
+                    $installment_amount = ($enrollment->total_cost - $enrollment->upfront_paid) / $enrollment->total_installment;
+                }elseif($enrollment->payment_mode == 'installment'){
+                    $installment_amount = $enrollment->total_cost / $enrollment->total_installment;
+                }elseif($enrollment->payment_mode == 'full'){
+                    Alert::error('Error', "Payment Failed.");
+                    return redirect()->back();
+                }
+
                 $installment_number = ++$enrollment->installment_completed;
-                $current_amount = $enrollment->total_paid + $request->amount_paid;
+                $current_amount = $enrollment->total_paid + $installment_amount;
 
                 if ($installment_number === 1 || ($installment_number <= $enrollment->total_installment && $enrollment->total_installment > 0))
                 {
@@ -50,7 +61,7 @@ class PaymentController extends Controller
                         'enrollment_id' => $enrollment->id,
                         'is_installment' => true,
                         'installment_number' => $installment_number,
-                        'amount_paid' => $request->amount_paid,
+                        'amount_paid' => $installment_amount,
                         'payment_type' => $request->payment_type,
                         'notes' => $request->notes,
                     ]);
@@ -81,16 +92,47 @@ class PaymentController extends Controller
         $enrollmentId = $request->enrollmentId;
 
         // Assuming you have a model named Enrollment
-        $enrollment = Enrollment::find($enrollmentId);
+        $enrollment = Enrollment::where('enroll_id', $enrollmentId)->first();
 
         if ($enrollment) {
-            // If the enrollment is found, return its data as JSON
+            // Handle full payment mode
+            if ($enrollment->payment_mode == 'full') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Already Full Paid',
+                    'installment_amount' => 0,
+                ]);
+            }
+
+            // Calculate installment amount and handle potential errors
+            if ($enrollment->payment_mode == 'upfront' || $enrollment->payment_mode == 'installment') {
+                if ($enrollment->total_installment == $enrollment->installment_completed) {
+                    $message = 'Already Full Paid';
+                    $success = false;
+                    $installment_amount = 0;
+                } else {
+                    if($enrollment->payment_mode == 'upfront'){
+                        $installment_amount = ($enrollment->total_cost - $enrollment->upfront_paid) / $enrollment->total_installment;
+                    }elseif($enrollment->payment_mode == 'installment'){
+                        $installment_amount = $enrollment->total_cost / $enrollment->total_installment;
+                    }
+                    $message = 'Per Installment Amount is: ' . $installment_amount;
+                    $success = true;
+                }
+            } else {
+                $message = 'Invalid payment mode';
+                $success = false;
+                $installment_amount = 0;
+            }
+
+            // Return response based on success or error
             return response()->json([
-                'total_cost' => $enrollment->total_cost,
-                // Add other enrollment data fields as needed
+                'success' => $success,
+                'message' => $message,
+                'installment_amount' => $installment_amount,
             ]);
         } else {
-            // If the enrollment is not found, return an error
+            // Return error if enrollment not found
             return response()->json(['error' => 'Enrollment not found'], 404);
         }
     }
@@ -125,4 +167,6 @@ class PaymentController extends Controller
     {
         //
     }
+
+
 }

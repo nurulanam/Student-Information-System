@@ -15,11 +15,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('program_id');
+            $table->string('enroll_id')->unique();
             $table->integer('total_cost')->nullable();
             $table->string('payment_mode')->nullable()->comment('full, upfront, installment');
             $table->integer('total_installment')->nullable();
             $table->integer('installment_completed')->default(0);
             $table->decimal('total_paid', 8, 2)->default(0);
+            $table->decimal('upfront_paid', 8, 2)->nullable();
             $table->string('status')->default('disable')->comment('active, disable');
             $table->text('notes')->nullable();
             $table->timestamps();

@@ -51,9 +51,16 @@ class EnrollmentController extends Controller
                 $enrollment = new Enrollment;
                 $enrollment->student_id = $student->id;
                 $enrollment->program_id = $request->program_id;
+                $enrollment->enroll_id = $this->generateUniqueEnrollID();
                 $enrollment->total_cost = $request->total_cost;
                 $enrollment->payment_mode = $request->payment_option;
                 $enrollment->total_installment = $request->total_installment;
+
+                // Assign upfront_paid amount based on payment mode
+                if ($request->payment_option == 'upfront') {
+                    $enrollment->upfront_paid = $request->amount_paid;
+                }
+                $enrollment->notes = $request->notes;
                 $enrollment->save();
 
                 if (strtolower($enrollment->payment_mode) === 'full' || strtolower($enrollment->payment_mode) === 'upfront') {
@@ -82,7 +89,7 @@ class EnrollmentController extends Controller
 
     }
 
-
+    //handle payments
     private function handlePayments(Enrollment $enrollment, Request $request)
     {
         // For full or upfront payment, create a single payment record
@@ -94,5 +101,21 @@ class EnrollmentController extends Controller
         ]);
         $enrollment->increment('total_paid', $request->amount_paid);
         return $payment;
+    }
+
+    // generate unique enrollment Id
+    private function generateUniqueEnrollID()
+    {
+        $prefix = 'ENR';
+        $timestamp = now()->timestamp; // Get the current timestamp
+
+        // Combine the prefix, timestamp, and a random number for uniqueness
+        $uniqueID = $prefix . $timestamp . mt_rand(1000, 9999);
+
+        while (Enrollment::where('enroll_id', $uniqueID)->exists()) {
+            $uniqueID = $prefix . $timestamp . mt_rand(1000, 9999);
+        }
+
+        return $uniqueID;
     }
 }

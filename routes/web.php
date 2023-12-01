@@ -47,13 +47,13 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
         Route::put('/students/update', [StudentController::class, 'update'])->name('students.update');
         Route::delete('/students/destroy/{id}', [StudentController::class, 'destroy'])->name('students.destroy');
 
-    });
-
-    Route::middleware(['auth', 'role:manager|finance|admin'])->group(function () {
+        //enrollments
         Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
         Route::post('/enrollments/store', [EnrollmentController::class, 'store'])->name('enrollments.store');
         Route::post('/enrollments/update', [EnrollmentController::class, 'update'])->name('enrollments.update');
+    });
 
+    Route::middleware(['auth', 'role:manager|finance|admin'])->group(function () {
         // payment
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::post('/payments/store', [PaymentController::class, 'store'])->name('payments.store');
@@ -70,14 +70,6 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
         Route::post('/programs/store', [ProgramController::class, 'store'])->name('programs.store');
         Route::put('/programs/update', [ProgramController::class, 'update'])->name('programs.update');
         Route::delete('/programs/delete/{id}', [ProgramController::class, 'destroy'])->name('programs.destroy');
-
-    });
-
-    Route::middleware(['auth', 'role:finance'])->group(function () {
-
-    });
-
-    Route::middleware(['auth', 'role:admin'])->group(function () {
 
     });
 });
