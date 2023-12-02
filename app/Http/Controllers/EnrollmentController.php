@@ -20,7 +20,7 @@ class EnrollmentController extends Controller
         $text = "Are you sure to change status?";
         confirmDelete($title, $text);
 
-        $enrollments = Enrollment::with(['student', 'program'])->paginate(20);
+        $enrollments = Enrollment::latest()->with(['student', 'program'])->paginate(20);
         $programs = Program::all();
         return view("enrollments", compact("enrollments", "programs"));
     }

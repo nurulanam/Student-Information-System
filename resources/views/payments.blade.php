@@ -78,6 +78,9 @@
                 </table>
             </div>
         </div>
+        <div class="d-flex justify-content-end align-items-end">
+            {!! $payments->links() !!}
+        </div>
 
         <div class="modal fade" id="addPayment" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">

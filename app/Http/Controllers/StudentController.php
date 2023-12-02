@@ -25,10 +25,11 @@ class StudentController extends Controller
                                 ->orWhere('std_id', 'like', '%' . $searchQuery . '%')
                                 ->orWhere('phone', 'like', '%' . $searchQuery . '%')
                                 ->orWhere('email', 'like', '%' . $searchQuery . '%')
+                                ->latest()
                                 ->paginate(20);
             $students->appends(['search' => $searchQuery]);
         } else {
-            $students = Student::paginate(20);
+            $students = Student::latest()->paginate(20);
         }
         return view('students', compact('students'));
     }

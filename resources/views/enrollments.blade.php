@@ -117,7 +117,9 @@
                     </table>
                 </div>
             </div>
-
+            <div class="d-flex justify-content-end align-items-end">
+                {!! $enrollments->links() !!}
+            </div>
 
             {{-- modal  --}}
             <div class="modal fade" id="addEnrollment" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
