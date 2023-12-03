@@ -88,9 +88,14 @@ class UserController extends Controller
     {
         $user = User::find($id);
         if (isset($user)) {
-            $user->delete();
-            Alert::success('Success', "User deleted successfully.");
-            return redirect()->route("users.index");
+            if ($user->hasRole('super-admin')) {
+                Alert::error('Error', "Can't Delete Super Admin.");
+                return redirect()->back();
+            }else{
+                $user->delete();
+                Alert::success('Success', "User deleted successfully.");
+                return redirect()->route("users.index");
+            }
         }else{
             Alert::error('Error', "User not found.");
             return redirect()->back();
