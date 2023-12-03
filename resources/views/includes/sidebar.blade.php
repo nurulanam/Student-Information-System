@@ -17,14 +17,14 @@
             <span class="hide-menu">Dashboard</span>
           </li>
             @if(Auth::user()->hasRole('super-admin'))
-              <li class="sidebar-item">
-                <a class="sidebar-link" href="{{ route('statics.index') }}" aria-expanded="false">
-                  <span>
-                    <i class="ti ti-layout-dashboard"></i>
-                  </span>
-                  <span class="hide-menu">Statics</span>
-                </a>
-              </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="{{ route('updates.index') }}" aria-expanded="false">
+                    <span>
+                        <i class="ti ti-reload"></i>
+                    </span>
+                    <span class="hide-menu">Updates</span>
+                    </a>
+                </li>
               <li class="sidebar-item">
                 <a class="sidebar-link" href="{{ route('users.index') }}" aria-expanded="false">
                   <span>
@@ -52,7 +52,7 @@
                     </a>
                 </li>
             @endif
-            @if(Auth::user()->hasRole('manager|finance|admin'))
+            @if(Auth::user()->hasRole('manager|finance'))
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('enrollments.index') }}" aria-expanded="false">
                     <span>
@@ -61,8 +61,6 @@
                     <span class="hide-menu">Enrollment</span>
                     </a>
                 </li>
-            @endif
-            @if(Auth::user()->hasRole('manager|finance'))
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('students.index') }}" aria-expanded="false">
                       <span>
@@ -71,16 +69,8 @@
                       <span class="hide-menu">Students</span>
                     </a>
                 </li>
-                <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ route('payments.index') }}" aria-expanded="false">
-                  <span>
-                    <i class="ti ti-file-description"></i>
-                  </span>
-                        <span class="hide-menu">Payments</span>
-                    </a>
-                </li>
             @endif
-            @if(Auth::user()->hasRole('admin'))
+            @if(Auth::user()->hasRole('manager|finance|admin'))
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('payments.index') }}" aria-expanded="false">
                   <span>

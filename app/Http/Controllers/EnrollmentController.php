@@ -47,6 +47,14 @@ class EnrollmentController extends Controller
                 Alert::error('Error', "Student not found.");
                 return redirect()->back()->withErrors($validation)->withInput();
             }else{
+                $existingEnrollment = Enrollment::where('student_id', $student->id)
+                    ->where('program_id', $request->program_id)
+                    ->first();
+
+                if ($existingEnrollment) {
+                    Alert::error('Error', "Student already enrolled in this program.");
+                    return redirect()->back()->withErrors($validation)->withInput();
+                }
                 // Create enrollment record
                 $enrollment = new Enrollment;
                 $enrollment->student_id = $student->id;

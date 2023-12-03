@@ -15,9 +15,7 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // Redirect based on user role
-        if ($user->hasRole('super-admin')) {
-            return $this->redirectToStatics();
-        } elseif ($user->hasRole('manager')) {
+        if ($user->hasRole('super-admin') || $user->hasRole('manager')) {
             return $this->redirectToUpdates();
         } elseif ($user->hasRole('finance')) {
             return $this->redirectToStatics();
@@ -27,11 +25,6 @@ class DashboardController extends Controller
 
         // Default redirection
         return redirect()->route('home');
-    }
-
-    protected function redirectToStatics(): RedirectResponse
-    {
-        return redirect('/dashboard/statics');
     }
 
     protected function redirectToUpdates(): RedirectResponse

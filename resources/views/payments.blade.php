@@ -10,17 +10,17 @@
             <div class="card-header d-flex flex-column flex-lg-row justify-content-md-between align-items-center">
                 <h1 class="card-title">All Enrollments</h1>
                 <div class="d-flex flex-wrap flex-md-nowrap justify-content-center justify-content-md-end align-items-center gap-3">
-                    <a href="{{ route('enrollments.index') }}" class="btn btn-danger order-1 order-md-0"><i class="ti ti-reload"></i></a>
-                    <form action="{{ route('enrollments.index') }}" method="get" class="order-0 order-md-1">
+                    <a href="{{ route('payments.index') }}" class="btn btn-danger order-1 order-md-0"><i class="ti ti-reload"></i></a>
+                    <form action="{{ route('payments.index') }}" method="get" class="order-0 order-md-1">
                         <div class="d-flex flex-wrap flex-md-nowrap  align-items-center">
-                            <input type="text" name="search" class="form-control" placeholder="Search by Enrollment Id" aria-describedby="search">
+                            <input type="text" name="search" class="form-control" placeholder="Search by Enrollment Id" value="{{ old('search') }}" aria-describedby="search">
                             <span class="d-flex align-items-center gap-2 ms-2">
                                 <label for="" class="label flex-shrink-0">To</label>
-                                <input type="date" name="to_date" class="form-control" placeholder="From Date" aria-describedby="todate">
+                                <input type="date" name="from_date" class="form-control" placeholder="From Date" value="{{ old('from_date') }}" aria-describedby="fromdate">
                             </span>
                             <span class="d-flex align-items-center gap-2 ms-2">
                                 <label for="" class="label flex-shrink-0">From</label>
-                                <input type="date" name="to_date" class="form-control" placeholder="From Date" aria-describedby="todate">
+                                <input type="date" name="to_date" class="form-control" placeholder="To Date" value="{{ old('to_date') }}" aria-describedby="todate">
                             </span>
                             <button class="btn btn-primary ms-2"id="search"><i class="ti ti-search"></i></button>
                         </div>
@@ -68,7 +68,17 @@
                                 </td>
                                 <td><span class="badge bg-primary">{{ $payment->installment_number }}</span></td>
                                 <td>{{ $payment->amount_paid }}</td>
-                                <td>{{ $payment->payment_type }}</td>
+                                <td>
+                                    @if ($payment->payment_type === 'cash')
+                                        Cash
+                                    @elseif ($payment->payment_type === 'bank_transfer')
+                                        Bank Transfer
+                                    @elseif ($payment->payment_type === 'direct_debit')
+                                        Direct Debit
+                                    @elseif ($payment->payment_type === 'credit_card')
+                                        Credit Card
+                                    @endif
+                                </td>
                                 <td>{{ $payment->notes }}</td>
                                 <td></td>
                             </tr>
@@ -104,10 +114,10 @@
 
                         <div class="mb-3">
                             <label for="installmentAmount" class="form-label">Installment Amount<span class="text-danger">*</span></label>
-                            <input type="number" name="amount_paid" class="form-control" id="installmentAmount" required readonly>
+                            <input type="number" name="amount_paid" class="form-control" id="installmentAmount" required>
                         </div>
                         <div class="mb-3" id="returnMessageBox">
-                            <p id="returnMessage">test</p>
+                            <p id="returnMessage"></p>
                         </div>
                         @error('amount_paid')
                             <p class="text-danger">{{  $message }}</p>
@@ -209,12 +219,13 @@
                 },
                 dataType: 'json',
                 success: function (data) {
-                    var installmentAmount = data.installment_amount;
+                    var dueAmount = data.due_amount;
                     var message = data.message;
+                    var installmentLeft = data.installment_left;
 
-                    $('#installmentAmount').val(installmentAmount);
+                    $('#installmentAmount').val(' ');
                     if (data.success) {
-                        $('#returnMessage').text(message);
+                        $('#returnMessage').text(message +' // '+ installmentLeft);
                         $('#returnMessage').removeClass('text-danger');
                         $('#returnMessage').addClass('text-dark');
                         $('#returnMessageBox').show();

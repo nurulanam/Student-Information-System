@@ -31,13 +31,15 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
 
     // super admin
     Route::middleware(['auth', 'role:super-admin'])->group(function () {
-        Route::get('/statics', [StaticsController::class, 'index'])->name('statics.index');
-
         // Users
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/update', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/destroy/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+    });
+    Route::middleware(['auth', 'role:super-admin|manager'])->group(function () {
+        // Updates
+        Route::get('/updates', [UpdateController::class, 'index'])->name('updates.index');
     });
 
     Route::middleware(['auth', 'role:manager|finance'])->group(function () {
@@ -62,9 +64,6 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
     });
 
     Route::middleware(['auth', 'role:manager'])->group(function () {
-        // Updates
-        Route::get('/updates', [UpdateController::class, 'index'])->name('updates.index');
-
         // Programs
         Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
         Route::post('/programs/store', [ProgramController::class, 'store'])->name('programs.store');

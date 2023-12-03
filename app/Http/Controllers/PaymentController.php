@@ -13,11 +13,32 @@ class PaymentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $payments = Payment::latest()->paginate(20);
+        $search = $request->get('search');
+        $fromDate = $request->get('from_date');
+        $toDate = $request->get('to_date');
+
+        $payments = Payment::latest();
+
+        if ($search) {
+            $enrollmentId = Enrollment::where('enroll_id', $search)->value('id');
+            if ($enrollmentId) {
+                $payments = $payments->where('enrollment_id', $enrollmentId);
+            }
+        }
+        if ($fromDate) {
+            $payments = $payments->whereDate('created_at', '>=', $fromDate);
+        }
+        if ($toDate) {
+            $payments = $payments->whereDate('created_at', '<=', $toDate);
+        }
+
+        $payments = $payments->paginate(20)->appends(['search' => $search, 'from_date' => $fromDate, 'to_date' => $toDate]);
+
         return view('payments', compact('payments'));
     }
+
 
 
     /**
@@ -41,19 +62,20 @@ class PaymentController extends Controller
         {
             $enrollment = Enrollment::where('enroll_id',$request->enrollment_id)->first();
             if (isset($enrollment)){
-                $installment_amount = 0;
+                $max_installment_amount = $enrollment->total_cost - $enrollment->total_paid;
 
-                if($enrollment->payment_mode == 'upfront'){
-                    $installment_amount = ($enrollment->total_cost - $enrollment->upfront_paid) / $enrollment->total_installment;
-                }elseif($enrollment->payment_mode == 'installment'){
-                    $installment_amount = $enrollment->total_cost / $enrollment->total_installment;
+                if($enrollment->payment_mode == 'upfront' || $enrollment->payment_mode == 'installment'){
+                    if($max_installment_amount < $request->amount_paid){
+                        Alert::error('Error', "Can't take more than total cost.");
+                        return redirect()->back();
+                    }
                 }elseif($enrollment->payment_mode == 'full'){
                     Alert::error('Error', "Payment Failed.");
                     return redirect()->back();
                 }
 
                 $installment_number = ++$enrollment->installment_completed;
-                $current_amount = $enrollment->total_paid + $installment_amount;
+                $current_amount = $enrollment->total_paid + $request->amount_paid;
 
                 if ($installment_number === 1 || ($installment_number <= $enrollment->total_installment && $enrollment->total_installment > 0))
                 {
@@ -61,7 +83,7 @@ class PaymentController extends Controller
                         'enrollment_id' => $enrollment->id,
                         'is_installment' => true,
                         'installment_number' => $installment_number,
-                        'amount_paid' => $installment_amount,
+                        'amount_paid' => $request->amount_paid,
                         'payment_type' => $request->payment_type,
                         'notes' => $request->notes,
                     ]);
@@ -100,7 +122,8 @@ class PaymentController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Already Full Paid',
-                    'installment_amount' => 0,
+                    'installment_left' => 0,
+                    'due_amount' => 0,
                 ]);
             }
 
@@ -109,31 +132,35 @@ class PaymentController extends Controller
                 if ($enrollment->total_installment == $enrollment->installment_completed) {
                     $message = 'Already Full Paid';
                     $success = false;
-                    $installment_amount = 0;
+                    $installment_left = 0;
+                    $due_amount = 0;
                 } else {
-                    if($enrollment->payment_mode == 'upfront'){
-                        $installment_amount = ($enrollment->total_cost - $enrollment->upfront_paid) / $enrollment->total_installment;
-                    }elseif($enrollment->payment_mode == 'installment'){
-                        $installment_amount = $enrollment->total_cost / $enrollment->total_installment;
-                    }
-                    $message = 'Per Installment Amount is: ' . $installment_amount;
+                    $due_amount = $enrollment->total_cost - $enrollment->total_paid;
+                    $message = 'Total Due Amount: ' . $due_amount;
+                    $installment_left = 'Installment Due: '.$enrollment->total_installment - $enrollment->installment_completed;
                     $success = true;
                 }
             } else {
                 $message = 'Invalid payment mode';
                 $success = false;
-                $installment_amount = 0;
+                $due_amount = 0;
             }
 
             // Return response based on success or error
             return response()->json([
                 'success' => $success,
                 'message' => $message,
-                'installment_amount' => $installment_amount,
+                'installment_left' => $installment_left,
+                'due_amount' => $due_amount,
             ]);
         } else {
             // Return error if enrollment not found
-            return response()->json(['error' => 'Enrollment not found'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Enrollment Not Found',
+                'installment_left' => 0,
+                'due_amount' => ' ',
+            ]);
         }
     }
     /**
