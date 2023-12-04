@@ -64,44 +64,48 @@ class PaymentController extends Controller
             if (isset($enrollment)){
                 $max_installment_amount = $enrollment->total_cost - $enrollment->total_paid;
 
-                if($enrollment->payment_mode == 'upfront' || $enrollment->payment_mode == 'installment'){
+                if($enrollment->payment_mode == 'full'){
+                    Alert::error('Error', "Payment Failed.");
+                    return redirect()->back();
+                }elseif($enrollment->payment_mode == 'upfront' || $enrollment->payment_mode == 'installment'){
                     if($max_installment_amount < $request->amount_paid){
                         Alert::error('Error', "Can't take more than total cost.");
                         return redirect()->back();
-                    }
-                }elseif($enrollment->payment_mode == 'full'){
-                    Alert::error('Error', "Payment Failed.");
-                    return redirect()->back();
-                }
-
-                $installment_number = ++$enrollment->installment_completed;
-                $current_amount = $enrollment->total_paid + $request->amount_paid;
-
-                if ($installment_number === 1 || ($installment_number <= $enrollment->total_installment && $enrollment->total_installment > 0))
-                {
-                    $payment = Payment::create([
-                        'enrollment_id' => $enrollment->id,
-                        'is_installment' => true,
-                        'installment_number' => $installment_number,
-                        'amount_paid' => $request->amount_paid,
-                        'payment_type' => $request->payment_type,
-                        'notes' => $request->notes,
-                    ]);
-                    if(isset($payment)){
-                        $enrollment->total_paid = $current_amount;
-                        $enrollment->installment_completed = $installment_number;
-                        $enrollment->update();
-
-                        Alert::success('Success', "Payment successfully created.");
-                        return redirect()->route('payments.index');
                     }else{
-                        Alert::error('Error', "Payment Failed.");
-                        return redirect()->route('payments.index');
+                        $installment_number = ++$enrollment->installment_completed;
+                        $current_amount = $enrollment->total_paid + $request->amount_paid;
+
+                        if ($installment_number === 1 || ($installment_number <= $enrollment->total_installment && $enrollment->total_installment > 0))
+                        {
+                            $payment = Payment::create([
+                                'enrollment_id' => $enrollment->id,
+                                'is_installment' => true,
+                                'installment_number' => $installment_number,
+                                'amount_paid' => $request->amount_paid,
+                                'payment_type' => $request->payment_type,
+                                'notes' => $request->notes,
+                            ]);
+                            if(isset($payment)){
+                                $enrollment->total_paid = $current_amount;
+                                $enrollment->installment_completed = $installment_number;
+                                $enrollment->update();
+
+                                Alert::success('Success', "Payment successfully created.");
+                                return redirect()->route('payments.index');
+                            }else{
+                                Alert::error('Error', "Payment Failed.");
+                                return redirect()->route('payments.index');
+                            }
+                        }else{
+                            Alert::error('Error', "Already paid all installments.");
+                            return redirect()->route('payments.index');
+                        }
                     }
-                }else{
-                    Alert::error('Error', "Already paid all installments.");
-                    return redirect()->route('payments.index');
                 }
+            }
+            else{
+                Alert::error('Error', "No enrollment record found.");
+                return redirect()->route('payments.index');
             }
         }
     }

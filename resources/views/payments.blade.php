@@ -114,7 +114,7 @@
 
                         <div class="mb-3">
                             <label for="installmentAmount" class="form-label">Installment Amount<span class="text-danger">*</span></label>
-                            <input type="number" name="amount_paid" class="form-control" id="installmentAmount" required>
+                            <input type="number" name="amount_paid" class="form-control" step="any" min="0" id="installmentAmount" required>
                         </div>
                         <div class="mb-3" id="returnMessageBox">
                             <p id="returnMessage"></p>
@@ -127,25 +127,25 @@
                             <label for="paymentType" class="form-label">Payment Type <span class="text-danger">*</span></label>
                             <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="payment_type" value="cash" id="paymentType1">
+                                    <input class="form-check-input" type="radio" name="payment_type" value="cash" id="paymentType1" @if(old('payment_type') == 'cash') checked @endif required>
                                     <label class="form-check-label" for="paymentType1">
                                         Cash
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="payment_type" value="bank_transfer" id="paymentType2">
+                                    <input class="form-check-input" type="radio" name="payment_type" value="bank_transfer" id="paymentType2" @if(old('payment_type') == 'bank_transfer') checked @endif>
                                     <label class="form-check-label" for="paymentType2">
                                         Bank Transfer
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="payment_type" value="direct_debit" id="paymentType3">
+                                    <input class="form-check-input" type="radio" name="payment_type" value="direct_debit" id="paymentType3" @if(old('payment_type') == 'direct_debit') checked @endif>
                                     <label class="form-check-label" for="paymentType3">
                                         Direct Debit
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="payment_type" value="credit_card" id="paymentType4">
+                                    <input class="form-check-input" type="radio" name="payment_type" value="credit_card" id="paymentType4" @if(old('payment_type') == 'credit_card') checked @endif>
                                     <label class="form-check-label" for="paymentType4">
                                         Credit Card
                                     </label>
