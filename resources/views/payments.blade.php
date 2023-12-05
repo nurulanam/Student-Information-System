@@ -13,14 +13,14 @@
                     <a href="{{ route('payments.index') }}" class="btn btn-danger order-1 order-md-0"><i class="ti ti-reload"></i></a>
                     <form action="{{ route('payments.index') }}" method="get" class="order-0 order-md-1">
                         <div class="d-flex flex-wrap flex-md-nowrap  align-items-center">
-                            <input type="text" name="search" class="form-control" placeholder="Search by Enrollment Id" value="{{ old('search') }}" aria-describedby="search">
-                            <span class="d-flex align-items-center gap-2 ms-2">
-                                <label for="" class="label flex-shrink-0">To</label>
-                                <input type="date" name="from_date" class="form-control" placeholder="From Date" value="{{ old('from_date') }}" aria-describedby="fromdate">
-                            </span>
+                            <input type="text" name="search" class="form-control" placeholder="Search by Enrollment Id" value="{{ request('search') }}" aria-describedby="search">
                             <span class="d-flex align-items-center gap-2 ms-2">
                                 <label for="" class="label flex-shrink-0">From</label>
-                                <input type="date" name="to_date" class="form-control" placeholder="To Date" value="{{ old('to_date') }}" aria-describedby="todate">
+                                <input type="date" name="from_date" class="form-control" placeholder="From Date" value="{{ request('from_date') }}" aria-describedby="fromdate">
+                            </span>
+                            <span class="d-flex align-items-center gap-2 ms-2">
+                                <label for="" class="label flex-shrink-0">To</label>
+                                <input type="date" name="to_date" class="form-control" placeholder="To Date" value="{{ request('to_date') }}" aria-describedby="todate">
                             </span>
                             <button class="btn btn-primary ms-2"id="search"><i class="ti ti-search"></i></button>
                         </div>
@@ -58,7 +58,7 @@
                     <tbody>
                         @foreach ($payments as $payment)
                             <tr>
-                                <td>{{ $payment->enrollment->enroll_id }}</td>
+                                <td>{{ $payment->enrollment->enroll_id}}</td>
                                 <td>
                                     @if ($payment->is_installment === 1)
                                         <span class="badge bg-primary">True</span>

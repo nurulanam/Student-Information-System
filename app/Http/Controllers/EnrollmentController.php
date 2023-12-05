@@ -14,14 +14,40 @@ use Illuminate\Support\Facades\Validator;
 
 class EnrollmentController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = $request->get('search');
+        $fromDate = $request->get('from_date');
+        $toDate = $request->get('to_date');
+
+
         $title = 'Change Status!';
         $text = "Are you sure to change status?";
         confirmDelete($title, $text);
+        
+        $enrollments = Enrollment::latest();
 
-        $enrollments = Enrollment::latest()->with(['student', 'program'])->paginate(20);
+        if ($search) {
+            // Search by both student ID and enrollment ID
+            $enrollments = $enrollments->where(function ($query) use ($search) {
+                $query->where('enroll_id', $search)
+                    ->orWhereHas('student', function ($query) use ($search) {
+                        $query->where('std_id', $search);
+                    });
+            });
+        }
+
+        if ($fromDate) {
+            $enrollments = $enrollments->whereDate('created_at', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $enrollments = $enrollments->whereDate('created_at', '<=', $toDate);
+        }
+
+        $enrollments = $enrollments->with(['student', 'program'])->paginate(20)->appends(['search' => $search, 'from_date' => $fromDate, 'to_date' => $toDate]);
         $programs = Program::all();
+
         return view("enrollments", compact("enrollments", "programs"));
     }
 

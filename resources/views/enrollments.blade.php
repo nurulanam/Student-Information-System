@@ -23,15 +23,16 @@
                         <a href="{{ route('enrollments.index') }}" class="btn btn-danger order-1 order-md-0"><i class="ti ti-reload"></i></a>
                         <form action="{{ route('enrollments.index') }}" method="get" class="order-0 order-md-1">
                             <div class="d-flex flex-wrap flex-md-nowrap  align-items-center">
-                                <input type="text" name="search" class="form-control" placeholder="Search by Invoice or Student id" aria-describedby="search">
-                                <span class="d-flex align-items-center gap-2 ms-2">
-                                    <label for="" class="label flex-shrink-0">To</label>
-                                    <input type="date" name="to_date" class="form-control" placeholder="From Date" aria-describedby="todate">
-                                </span>
+                                <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="Search by Enrollment Id or Student id" aria-describedby="search">
                                 <span class="d-flex align-items-center gap-2 ms-2">
                                     <label for="" class="label flex-shrink-0">From</label>
-                                    <input type="date" name="to_date" class="form-control" placeholder="From Date" aria-describedby="todate">
+                                    <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}" placeholder="From Date" aria-describedby="todate">
                                 </span>
+                                <span class="d-flex align-items-center gap-2 ms-2">
+                                    <label for="" class="label flex-shrink-0">To</label>
+                                    <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}" placeholder="From Date" aria-describedby="todate">
+                                </span>
+
                                 <button class="btn btn-primary ms-2"id="search"><i class="ti ti-search"></i></button>
                             </div>
                         </form>
@@ -42,45 +43,48 @@
                     <table class="table text-nowrap table-borderless table-hover mb-0 align-middle">
                         <thead class="text-dark fs-4">
                         <tr>
-                            <th class="border-bottom-0">
+                            <th>
                             <h6 class="fw-semibold mb-0">Enroll Id</h6>
                             </th>
-                            <th class="border-bottom-0">
+                            <th>
                             <h6 class="fw-semibold mb-0">Student Id</h6>
                             </th>
-                            <th class="border-bottom-0">
+                            <th>
                             <h6 class="fw-semibold mb-0">Program</h6>
                             </th>
-                            <th class="border-bottom-0">
+                            <th>
                             <h6 class="fw-semibold mb-0">Payment Mode</h6>
                             </th>
-                            <th class="border-bottom-0">
+                            <th>
                             <h6 class="fw-semibold mb-0">Total Cost</h6>
                             </th>
-                            <th class="border-bottom-0">
+                            <th>
                             <h6 class="fw-semibold mb-0">Upfornt</h6>
                             </th>
-                            <th class="border-bottom-0">
+                            <th>
                             <h6 class="fw-semibold mb-0">Total Paid</h6>
                             </th>
-                            <th class="border-bottom-0">
+                            <th>
                             <h6 class="fw-semibold mb-0">Total Installments</h6>
                             </th>
-                            <th class="border-bottom-0">
+                            <th>
                             <h6 class="fw-semibold mb-0">Paid Installments</h6>
                             </th>
-                            <th class="border-bottom-0">
+                            <th>
                             <h6 class="fw-semibold mb-0">Status</h6>
+                            </th>
+                            <th>
+                            <h6 class="fw-semibold mb-0">Action</h6>
                             </th>
                         </tr>
                         </thead>
                         <tbody>
                             @foreach ($enrollments as $enrollment)
                                 <tr>
-                                    <td class="border-bottom-0">{{ $enrollment->enroll_id }}</td>
-                                    <td class="border-bottom-0">{{ $enrollment->student->std_id }}</td>
-                                    <td class="border-bottom-0">{{ $enrollment->program->name }}</td>
-                                    <td class="border-bottom-0">
+                                    <td>{{ $enrollment->enroll_id}}</td>
+                                    <td>{{ $enrollment->student->std_id }}</td>
+                                    <td>{{ $enrollment->program->name }}</td>
+                                    <td>
                                         @if ($enrollment->payment_mode === 'full')
                                             Full Paid
                                         @elseif ($enrollment->payment_mode === 'upfront')
@@ -89,12 +93,12 @@
                                             Installment
                                         @endif
                                     </td>
-                                    <td class="border-bottom-0">{{ $enrollment->total_cost}}</td>
-                                    <td class="border-bottom-0">{{ $enrollment->upfront_paid}}</td>
-                                    <td class="border-bottom-0">{{ $enrollment->total_paid}}</td>
-                                    <td class="border-bottom-0">{{ $enrollment->total_installment}}</td>
-                                    <td class="border-bottom-0">{{ $enrollment->installment_completed}}</td>
-                                    <td class="border-bottom-0">
+                                    <td>{{ $enrollment->total_cost}}</td>
+                                    <td>{{ $enrollment->upfront_paid}}</td>
+                                    <td>{{ $enrollment->total_paid}}</td>
+                                    <td>{{ $enrollment->total_installment}}</td>
+                                    <td>{{ $enrollment->installment_completed}}</td>
+                                    <td>
                                         @if ($enrollment->status === 'active')
                                             <a href="#" class="badge bg-success" data-confirm-delete="true"><i class="ti ti-arrow-up"></i></a>
                                         @elseif($enrollment->status === 'disable')
@@ -111,7 +115,187 @@
                                             <button type="button" id="confirmUpdateBtn" class="btn btn-primary">Update</button>
                                         </form> --}}
                                     </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editEnroll{{ $enrollment->id }}"><i class="ti ti-pencil"></i></button>
+                                            <a href="" class="btn btn-danger btn-sm" data-confirm-delete="true">Delete</a>
+                                        </div>
+                                    </td>
                                 </tr>
+                                {{-- modal  --}}
+                                <div class="modal fade" id="editEnroll{{ $enrollment->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit {{ $enrollment->enroll_id }}</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="{{ route('enrollments.store') }}" method="post">
+                                                    @csrf
+                                                    <div class="mb-3">
+                                                        <label for="studentId" class="form-label">Student Id<span class="text-danger">*</span></label>
+                                                        <input type="text" name="new_student_id" class="form-control" value="{{ $enrollment->student->std_id }}" id="studentId"  placeholder="ST0000000" required>
+                                                        @error('new_student_id')
+                                                            <p class="text-danger">{{  $message }}</p>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="programId" class="form-label">Program <span class="text-danger">*</span></label>
+                                                        <select name="program_id" class="form-control" id="programId" required>
+                                                            <option value="">Select Program</option>
+                                                            @foreach ($programs as $program )
+                                                                <option value="{{ $program->id }}" @if ($enrollment->program_id == $program->id) selected @endif>{{ $program->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        @error('program_id')
+                                                            <p class="text-danger">{{  $message }}</p>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="totalCost" class="form-label">Total Cost <span class="text-danger">*</span></label>
+                                                        <input type="text" name="total_cost" class="form-control" value="{{ $enrollment->total_cost }}" id="totalCost" required>
+                                                        @error('total_cost')
+                                                            <p class="text-danger">{{  $message }}</p>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label  class="form-label" for="paymentOption">Payment Option <span class="text-danger">*</span></label>
+                                                        <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="payment_option" value="full" id="paymentOptionFull" @if($enrollment->payment_mode == 'full') checked @endif >
+                                                                <label class="form-check-label" for="paymentOptionFull">
+                                                                    Full Payment
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="payment_option" value="upfront" id="paymentOptionUpFront" @if($enrollment->payment_mode == 'upfront') checked @endif>
+                                                                <label class="form-check-label" for="paymentOptionUpFront">
+                                                                    Up Front
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="payment_option" value="installment" id="paymentOptionInstallment" @if($enrollment->payment_mode == 'installment') checked @endif>
+                                                                <label class="form-check-label" for="paymentOptionInstallment">
+                                                                    Installments
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        @error('payment_option')
+                                                            <p class="text-danger">{{  $message }}</p>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="mb-3" id="installmentDetails" style="display: none">
+                                                        <label for="totalInstallment" class="form-label">Installments <span class="text-danger">*</span></label>
+                                                        <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input totalInstallment1" type="radio" name="total_installment" value="1" @if($enrollment->total_installment == '1') checked @endif data-full-payment-field>
+                                                                <label class="form-check-label" for="totalInstallment1">
+                                                                1
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input totalInstallment2" type="radio" name="total_installment" value="2" @if($enrollment->total_installment == '2') checked @endif data-full-payment-field>
+                                                                <label class="form-check-label" for="totalInstallment2">
+                                                                2
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input totalInstallment3" type="radio" name="total_installment" value="3" @if($enrollment->total_installment == '3') checked @endif data-full-payment-field>
+                                                                <label class="form-check-label" for="totalInstallment3">
+                                                                3
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input totalInstallment4" type="radio" name="total_installment" value="4" @if($enrollment->total_installment == '4') checked @endif data-full-payment-field>
+                                                                <label class="form-check-label" for="totalInstallment4">
+                                                                4
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input totalInstallment5" type="radio" name="total_installment" value="5" @if($enrollment->total_installment == '5') checked @endif data-full-payment-field>
+                                                                <label class="form-check-label" for="totalInstallment5">
+                                                                5
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input totalInstallment6" type="radio" name="total_installment" value="6" @if($enrollment->total_installment == '6') checked @endif data-full-payment-field>
+                                                                <label class="form-check-label" for="totalInstallment6">
+                                                                6
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input totalInstallment7" type="radio" name="total_installment" value="7" @if($enrollment->total_installment == '7') checked @endif data-full-payment-field>
+                                                                <label class="form-check-label" for="totalInstallment7">
+                                                                7
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input totalInstallment8" type="radio" name="total_installment" value="8" @if($enrollment->total_installment == '8') checked @endif data-full-payment-field>
+                                                                <label class="form-check-label" for="totalInstallment8">
+                                                                8
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        @error('total_installment')
+                                                            <p class="text-danger">{{  $message }}</p>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="paymentType" class="form-label">Payment Type <span class="text-danger">*</span></label>
+                                                        <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="payment_type" value="cash" id="paymentType1" @if($enrollment->payment_type == 'cash') checked @endif required>
+                                                                <label class="form-check-label" for="paymentType1">
+                                                                    Cash
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="payment_type" value="bank_transfer" id="paymentType2" @if($enrollment->payment_type == 'bank_transfer') checked @endif>
+                                                                <label class="form-check-label" for="paymentType2">
+                                                                    Bank Transfer
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="payment_type" value="direct_debit" id="paymentType3" @if($enrollment->payment_type == 'direct_debit') checked @endif>
+                                                                <label class="form-check-label" for="paymentType3">
+                                                                    Direct Debit
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="payment_type" value="credit_card" id="paymentType4" @if($enrollment->payment_type == 'credit_card') checked @endif>
+                                                                <label class="form-check-label" for="paymentType4">
+                                                                    Credit Card
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        @error('payment_type')
+                                                            <p class="text-danger">{{  $message }}</p>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="calculation mb-3">
+                                                        <hr>
+                                                        <div class="d-flex justify-content-between items-center mb-1">
+                                                            <p><b>Per Installment</b></p>
+                                                            <p class="text-end" id="perInstallment">0</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="notes" class="form-label">Notes</label>
+                                                        <textarea name="notes" class="form-control" id="notes" rows="2">{{ $enrollment->notes }}</textarea>
+                                                        @error('notes')
+                                                            <p class="text-danger">{{  $message }}</p>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="d-flex justify-content-end align-items-center gap-2">
+                                                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                                                        <button class="btn btn-primary">Enroll</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             @endforeach
                         </tbody>
                     </table>

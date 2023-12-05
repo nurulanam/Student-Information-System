@@ -34,7 +34,7 @@ class PaymentController extends Controller
             $payments = $payments->whereDate('created_at', '<=', $toDate);
         }
 
-        $payments = $payments->paginate(20)->appends(['search' => $search, 'from_date' => $fromDate, 'to_date' => $toDate]);
+        $payments = $payments->paginate(10)->appends(['search' => $search, 'from_date' => $fromDate, 'to_date' => $toDate]);
 
         return view('payments', compact('payments'));
     }
