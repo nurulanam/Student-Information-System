@@ -52,7 +52,7 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
         //enrollments
         Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
         Route::post('/enrollments/store', [EnrollmentController::class, 'store'])->name('enrollments.store');
-        Route::post('/enrollments/update', [EnrollmentController::class, 'update'])->name('enrollments.update');
+        Route::put('/enrollments/update', [EnrollmentController::class, 'update'])->name('enrollments.update');
     });
 
     Route::middleware(['auth', 'role:manager|finance|admin'])->group(function () {

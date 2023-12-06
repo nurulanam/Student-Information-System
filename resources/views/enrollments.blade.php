@@ -104,16 +104,6 @@
                                         @elseif($enrollment->status === 'disable')
                                             <a href="#" class="badge bg-danger" ><i class="ti ti-arrow-down"></i></a>
                                         @endif
-                                        {{-- <form id="updateEnrollmentForm" action="{{ route('enrollments.update') }}" method="POST">
-                                            @csrf
-                                            <!-- Your form fields go here -->
-                                            <div class="d-none">
-                                                <input type="number" name="id" value="{{  }}" >
-                                            </div>
-
-                                            <!-- Add a confirm button -->
-                                            <button type="button" id="confirmUpdateBtn" class="btn btn-primary">Update</button>
-                                        </form> --}}
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
@@ -123,7 +113,7 @@
                                     </td>
                                 </tr>
                                 {{-- modal  --}}
-                                <div class="modal fade" id="editEnroll{{ $enrollment->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal fade common-modal" id="editEnroll{{ $enrollment->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
@@ -131,8 +121,10 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
-                                                <form action="{{ route('enrollments.store') }}" method="post">
+                                                <form action="{{ route('enrollments.update') }}" method="post">
+                                                    @method('PUT')
                                                     @csrf
+                                                    <input type="hidden" name="id" value="{{ $enrollment->id }}">
                                                     <div class="mb-3">
                                                         <label for="studentId" class="form-label">Student Id<span class="text-danger">*</span></label>
                                                         <input type="text" name="new_student_id" class="form-control" value="{{ $enrollment->student->std_id }}" id="studentId"  placeholder="ST0000000" required>
@@ -142,154 +134,115 @@
                                                     </div>
                                                     <div class="mb-3">
                                                         <label for="programId" class="form-label">Program <span class="text-danger">*</span></label>
-                                                        <select name="program_id" class="form-control" id="programId" required>
+                                                        <select name="new_program_id" class="form-control" id="programId" required>
                                                             <option value="">Select Program</option>
                                                             @foreach ($programs as $program )
                                                                 <option value="{{ $program->id }}" @if ($enrollment->program_id == $program->id) selected @endif>{{ $program->name }}</option>
                                                             @endforeach
                                                         </select>
-                                                        @error('program_id')
+                                                        @error('new_program_id')
                                                             <p class="text-danger">{{  $message }}</p>
                                                         @enderror
                                                     </div>
                                                     <div class="mb-3">
                                                         <label for="totalCost" class="form-label">Total Cost <span class="text-danger">*</span></label>
-                                                        <input type="text" name="total_cost" class="form-control" value="{{ $enrollment->total_cost }}" id="totalCost" required>
-                                                        @error('total_cost')
+                                                        <input type="text" name="new_total_cost" class="form-control" value="{{ $enrollment->total_cost }}" id="totalCost" required>
+                                                        @error('new_total_cost')
                                                             <p class="text-danger">{{  $message }}</p>
                                                         @enderror
                                                     </div>
-                                                    <div class="mb-3">
+                                                    {{-- <div class="mb-3">
                                                         <label  class="form-label" for="paymentOption">Payment Option <span class="text-danger">*</span></label>
                                                         <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="payment_option" value="full" id="paymentOptionFull" @if($enrollment->payment_mode == 'full') checked @endif >
-                                                                <label class="form-check-label" for="paymentOptionFull">
+                                                                <input class="form-check-input payment_option_full" type="radio" name="new_payment_option" value="full" id="paymentOptionFull{{ $enrollment->id }}" @if($enrollment->payment_mode == 'full') checked @endif >
+                                                                <label class="form-check-label" for="paymentOptionFull{{ $enrollment->id }}">
                                                                     Full Payment
                                                                 </label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="payment_option" value="upfront" id="paymentOptionUpFront" @if($enrollment->payment_mode == 'upfront') checked @endif>
-                                                                <label class="form-check-label" for="paymentOptionUpFront">
+                                                                <input class="form-check-input payment_option_up_front" type="radio" name="new_payment_option" value="upfront" id="paymentOptionUpFront{{ $enrollment->id }}" @if($enrollment->payment_mode == 'upfront') checked @endif>
+                                                                <label class="form-check-label" for="paymentOptionUpFront{{ $enrollment->id }}">
                                                                     Up Front
                                                                 </label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="payment_option" value="installment" id="paymentOptionInstallment" @if($enrollment->payment_mode == 'installment') checked @endif>
-                                                                <label class="form-check-label" for="paymentOptionInstallment">
+                                                                <input class="form-check-input payment_option_installment" type="radio" name="new_payment_option" value="installment" id="paymentOptionInstallment{{ $enrollment->id }}" @if($enrollment->payment_mode == 'installment') checked @endif>
+                                                                <label class="form-check-label" for="paymentOptionInstallment{{ $enrollment->id }}">
                                                                     Installments
                                                                 </label>
                                                             </div>
                                                         </div>
-                                                        @error('payment_option')
+                                                        @error('new_payment_option')
                                                             <p class="text-danger">{{  $message }}</p>
                                                         @enderror
                                                     </div>
-                                                    <div class="mb-3" id="installmentDetails" style="display: none">
+                                                    <div class="mb-3 total_installmnet_box" id="installmentDetails{{ $enrollment->id }}" style="display: none">
                                                         <label for="totalInstallment" class="form-label">Installments <span class="text-danger">*</span></label>
                                                         <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
                                                             <div class="form-check">
-                                                                <input class="form-check-input totalInstallment1" type="radio" name="total_installment" value="1" @if($enrollment->total_installment == '1') checked @endif data-full-payment-field>
-                                                                <label class="form-check-label" for="totalInstallment1">
+                                                                <input class="form-check-input total_installment1" type="radio" name="new_total_installment" id="totalInstallment1{{ $enrollment->id }}" value="1" @if($enrollment->total_installment == '1') checked @endif>
+                                                                <label class="form-check-label" for="totalInstallment1{{ $enrollment->id }}">
                                                                 1
                                                                 </label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input totalInstallment2" type="radio" name="total_installment" value="2" @if($enrollment->total_installment == '2') checked @endif data-full-payment-field>
-                                                                <label class="form-check-label" for="totalInstallment2">
+                                                                <input class="form-check-input total_installment2" type="radio" name="new_total_installment" id="totalInstallment2{{ $enrollment->id }}" value="2" @if($enrollment->total_installment == '2') checked @endif>
+                                                                <label class="form-check-label" for="totalInstallment2{{ $enrollment->id }}">
                                                                 2
                                                                 </label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input totalInstallment3" type="radio" name="total_installment" value="3" @if($enrollment->total_installment == '3') checked @endif data-full-payment-field>
-                                                                <label class="form-check-label" for="totalInstallment3">
+                                                                <input class="form-check-input total_installment3" type="radio" name="new_total_installment"  id="totalInstallment3{{ $enrollment->id }}" value="3" @if($enrollment->total_installment == '3') checked @endif>
+                                                                <label class="form-check-label" for="totalInstallment3{{ $enrollment->id }}">
                                                                 3
                                                                 </label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input totalInstallment4" type="radio" name="total_installment" value="4" @if($enrollment->total_installment == '4') checked @endif data-full-payment-field>
-                                                                <label class="form-check-label" for="totalInstallment4">
+                                                                <input class="form-check-input total_installment4" type="radio" name="new_total_installment"  id="totalInstallment4{{ $enrollment->id }}" value="4" @if($enrollment->total_installment == '4') checked @endif>
+                                                                <label class="form-check-label" for="totalInstallment4{{ $enrollment->id }}">
                                                                 4
                                                                 </label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input totalInstallment5" type="radio" name="total_installment" value="5" @if($enrollment->total_installment == '5') checked @endif data-full-payment-field>
-                                                                <label class="form-check-label" for="totalInstallment5">
+                                                                <input class="form-check-input total_installment5" type="radio" name="new_total_installment"  id="totalInstallment5{{ $enrollment->id }}" value="5" @if($enrollment->total_installment == '5') checked @endif>
+                                                                <label class="form-check-label" for="totalInstallment5{{ $enrollment->id }}">
                                                                 5
                                                                 </label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input totalInstallment6" type="radio" name="total_installment" value="6" @if($enrollment->total_installment == '6') checked @endif data-full-payment-field>
-                                                                <label class="form-check-label" for="totalInstallment6">
+                                                                <input class="form-check-input total_installment6" type="radio" name="new_total_installment"  id="totalInstallment6{{ $enrollment->id }}" value="6" @if($enrollment->total_installment == '6') checked @endif>
+                                                                <label class="form-check-label" for="totalInstallment6{{ $enrollment->id }}">
                                                                 6
                                                                 </label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input totalInstallment7" type="radio" name="total_installment" value="7" @if($enrollment->total_installment == '7') checked @endif data-full-payment-field>
-                                                                <label class="form-check-label" for="totalInstallment7">
+                                                                <input class="form-check-input total_installment7" type="radio" name="new_total_installment"  id="totalInstallment7{{ $enrollment->id }}" value="7" @if($enrollment->total_installment == '7') checked @endif>
+                                                                <label class="form-check-label" for="totalInstallment7{{ $enrollment->id }}">
                                                                 7
                                                                 </label>
                                                             </div>
                                                             <div class="form-check">
-                                                                <input class="form-check-input totalInstallment8" type="radio" name="total_installment" value="8" @if($enrollment->total_installment == '8') checked @endif data-full-payment-field>
-                                                                <label class="form-check-label" for="totalInstallment8">
+                                                                <input class="form-check-input total_installment8" type="radio" name="new_total_installment"  id="totalInstallment8{{ $enrollment->id }}" value="8" @if($enrollment->total_installment == '8') checked @endif>
+                                                                <label class="form-check-label" for="totalInstallment8{{ $enrollment->id }}">
                                                                 8
                                                                 </label>
                                                             </div>
                                                         </div>
-                                                        @error('total_installment')
+                                                        @error('new_total_installment')
                                                             <p class="text-danger">{{  $message }}</p>
                                                         @enderror
-                                                    </div>
+                                                    </div> --}}
                                                     <div class="mb-3">
-                                                        <label for="paymentType" class="form-label">Payment Type <span class="text-danger">*</span></label>
-                                                        <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="payment_type" value="cash" id="paymentType1" @if($enrollment->payment_type == 'cash') checked @endif required>
-                                                                <label class="form-check-label" for="paymentType1">
-                                                                    Cash
-                                                                </label>
-                                                            </div>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="payment_type" value="bank_transfer" id="paymentType2" @if($enrollment->payment_type == 'bank_transfer') checked @endif>
-                                                                <label class="form-check-label" for="paymentType2">
-                                                                    Bank Transfer
-                                                                </label>
-                                                            </div>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="payment_type" value="direct_debit" id="paymentType3" @if($enrollment->payment_type == 'direct_debit') checked @endif>
-                                                                <label class="form-check-label" for="paymentType3">
-                                                                    Direct Debit
-                                                                </label>
-                                                            </div>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="payment_type" value="credit_card" id="paymentType4" @if($enrollment->payment_type == 'credit_card') checked @endif>
-                                                                <label class="form-check-label" for="paymentType4">
-                                                                    Credit Card
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                        @error('payment_type')
-                                                            <p class="text-danger">{{  $message }}</p>
-                                                        @enderror
-                                                    </div>
-                                                    <div class="calculation mb-3">
-                                                        <hr>
-                                                        <div class="d-flex justify-content-between items-center mb-1">
-                                                            <p><b>Per Installment</b></p>
-                                                            <p class="text-end" id="perInstallment">0</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="notes" class="form-label">Notes</label>
-                                                        <textarea name="notes" class="form-control" id="notes" rows="2">{{ $enrollment->notes }}</textarea>
-                                                        @error('notes')
+                                                        <label for="notes{{ $enrollment->id }}" class="form-label">Notes</label>
+                                                        <textarea name="new_notes" class="form-control" id="notes{{ $enrollment->id }}" rows="2">{{ $enrollment->notes }}</textarea>
+                                                        @error('new_notes')
                                                             <p class="text-danger">{{  $message }}</p>
                                                         @enderror
                                                     </div>
                                                     <div class="d-flex justify-content-end align-items-center gap-2">
                                                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
-                                                        <button class="btn btn-primary">Enroll</button>
+                                                        <button class="btn btn-primary">Update</button>
                                                     </div>
                                                 </form>
                                             </div>
@@ -497,29 +450,6 @@
 
 @endsection
 @section('extraJs')
-{{-- <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Add a click event listener to the confirm button
-        document.getElementById('confirmUpdateBtn').addEventListener('click', function () {
-            // Show a SweetAlert confirmation dialog
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'You won\'t be able to revert this!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, update it!'
-            }).then((result) => {
-                // If the user clicks "Yes"
-                if (result.isConfirmed) {
-                    // Submit the form
-                    document.getElementById('updateEnrollmentForm').submit();
-                }
-            });
-        });
-    });
-</script> --}}
 
 <script>
     window.addEventListener('load', () => {
@@ -629,9 +559,45 @@
     });
 </script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var modals = document.querySelectorAll('.common-modal');
 
+        modals.forEach(function (modal) {
+            var enrollmentId = modal.id.replace('editEnroll', '');
+            var modalInstance = new bootstrap.Modal(modal);
 
+            // Handle the change event for the payment option radio buttons
+            var paymentOptions = modal.querySelectorAll('input[name="new_payment_option"]');
+            paymentOptions.forEach(function (option) {
+                option.addEventListener('change', function () {
+                    var totalInstallmentBox = document.getElementById('installmentDetails' + enrollmentId);
 
+                    // Check the selected payment option and toggle visibility accordingly
+                    if (option.value === 'full') {
+                        totalInstallmentBox.style.display = 'none';
 
+                        var innerRadioFields = totalInstallmentBox.querySelectorAll('input[type="radio"]');
+                        innerRadioFields.forEach(function (innerRadio) {
+                            innerRadio.disabled = true;
+                        });
+                    } else if(option.value === 'upfront' || option.value === 'installment') {
+                        totalInstallmentBox.style.display = 'block';
+                        var innerRadioFields = totalInstallmentBox.querySelectorAll('input[type="radio"]');
+                        innerRadioFields.forEach(function (innerRadio) {
+                            innerRadio.disabled = false;
+                        });
+                    }
+                });
+            });
+
+            // Trigger the change event for the initially selected payment option
+            var selectedPaymentOption = modal.querySelector('input[name="new_payment_option"]:checked');
+            if (selectedPaymentOption) {
+                selectedPaymentOption.dispatchEvent(new Event('change'));
+            }
+        });
+    });
+</script>
 
 @endsection

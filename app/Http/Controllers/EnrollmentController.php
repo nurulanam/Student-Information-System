@@ -24,7 +24,7 @@ class EnrollmentController extends Controller
         $title = 'Change Status!';
         $text = "Are you sure to change status?";
         confirmDelete($title, $text);
-        
+
         $enrollments = Enrollment::latest();
 
         if ($search) {
@@ -117,10 +117,66 @@ class EnrollmentController extends Controller
                     Alert::success('Success', "Enrollment active successfully.");
                     return redirect()->route('enrollments.index');
                 }
-
             }
         }
+    }
 
+    //update
+    public function update(Request $request){
+        $validation = Validator::make($request->all(), [
+            'id' => 'required|exists:enrollments,id',
+            'new_student_id' => 'required|exists:students,std_id',
+            'new_program_id' => 'required|exists:programs,id',
+            'new_total_cost' => 'required|integer|min:0',
+            'new_notes' => 'nullable|string',
+        ]);
+        if ($validation->fails()) {
+            Alert::error('Error', "Please fill correct information.");
+            return redirect()->back()->withErrors($validation)->withInput();
+        }else{
+            $student = Student::where('std_id', $request->new_student_id)->first();
+
+            if (!$student) {
+                Alert::error('Error', "Student not found.");
+                return redirect()->back()->withErrors($validation)->withInput();
+            }else{
+                $existingEnrollments = Enrollment::where('student_id', $student->id)->get();
+
+                $isAlreadyEnrolled = false;
+                foreach ($existingEnrollments as $check_enrollment) {
+                    // Check if student is already enrolled in the program
+                    if ($check_enrollment->program_id == $request->new_program_id && $check_enrollment->id != $request->id) {
+                        $isAlreadyEnrolled = true;
+                        break;
+                    }
+                }
+                // dd($isAlreadyEnrolled);
+                if ($isAlreadyEnrolled) {
+                    Alert::error('Error', "Student is already enrolled in this program.");
+                    return redirect()->back()->withErrors($validation)->withInput();
+                } else {
+                    // Update the enrollment with the new information
+                    $enrollment = Enrollment::where('student_id', $student->id)
+                        ->where('program_id', $request->new_program_id)
+                        ->first();
+
+                    if ($enrollment) {
+                        $enrollment->update([
+                            'student_id' => $student->id,
+                            'program_id' => $request->new_program_id,
+                            'total_cost' => $request->new_total_cost,
+                            'notes' => $request->new_notes,
+                        ]);
+                    } else {
+                        Alert::error('Error', "Enrollment not found.");
+                        return redirect()->back()->withErrors($validation)->withInput();
+                    }
+
+                    Alert::success('Success', "Enrollment updated successfully.");
+                    return redirect()->back();
+                }
+            }
+        }
     }
 
     //handle payments
