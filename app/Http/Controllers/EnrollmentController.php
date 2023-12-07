@@ -21,8 +21,8 @@ class EnrollmentController extends Controller
         $toDate = $request->get('to_date');
 
 
-        $title = 'Change Status!';
-        $text = "Are you sure to change status?";
+        $title = 'Delete Enrollment!';
+        $text = "Are you sure to delete? It will also delete all payment history.";
         confirmDelete($title, $text);
 
         $enrollments = Enrollment::latest();
@@ -161,12 +161,18 @@ class EnrollmentController extends Controller
                         ->first();
 
                     if ($enrollment) {
-                        $enrollment->update([
+                        if($enrollment->total_paid > $request->new_total_cost){
+                            Alert::error('Error', "Already paid more than new cost.");
+                            return redirect()->back()->withErrors($validation)->withInput();
+                        }else{
+                            $enrollment->update([
                             'student_id' => $student->id,
                             'program_id' => $request->new_program_id,
                             'total_cost' => $request->new_total_cost,
                             'notes' => $request->new_notes,
                         ]);
+                        }
+
                     } else {
                         Alert::error('Error', "Enrollment not found.");
                         return redirect()->back()->withErrors($validation)->withInput();
@@ -178,6 +184,19 @@ class EnrollmentController extends Controller
             }
         }
     }
+
+    public function destroy($id){
+        $enrollment = Enrollment::find($id);
+        if(isset($enrollment)){
+            $enrollment->delete();
+            Alert::success('Success', "Enrollment deleted successfully.");
+            return redirect()->back();
+        }else{
+            Alert::error('Error', "Enrollment not found.");
+            return redirect()->back();
+        }
+    }
+
 
     //handle payments
     private function handlePayments(Enrollment $enrollment, Request $request)

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
 
-            $table->foreign('enrollment_id')->references('id')->on('enrollments');
+            $table->foreign('enrollment_id')->references('id')->on('enrollments')->onDelete('cascade');
         });
     }
 

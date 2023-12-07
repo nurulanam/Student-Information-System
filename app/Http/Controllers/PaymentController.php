@@ -36,6 +36,11 @@ class PaymentController extends Controller
 
         $payments = $payments->paginate(10)->appends(['search' => $search, 'from_date' => $fromDate, 'to_date' => $toDate]);
 
+
+        $title = 'Delete Payment!';
+        $text = "Are you sure to delete? It will also minus total paid.";
+        confirmDelete($title, $text);
+
         return view('payments', compact('payments'));
     }
 
@@ -196,7 +201,15 @@ class PaymentController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $payment = Payment::find($id);
+        if(isset($payment)){
+            $payment->delete();
+            Alert::success('Success', "Payment deleted successfully.");
+            return redirect()->back();
+        }else{
+            Alert::error('Error', "Payment not found.");
+            return redirect()->back();
+        }
     }
 
 

@@ -53,6 +53,8 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
         Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
         Route::post('/enrollments/store', [EnrollmentController::class, 'store'])->name('enrollments.store');
         Route::put('/enrollments/update', [EnrollmentController::class, 'update'])->name('enrollments.update');
+        Route::delete('/enrollments/destroy/{id}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
+
     });
 
     Route::middleware(['auth', 'role:manager|finance|admin'])->group(function () {

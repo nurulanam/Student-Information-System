@@ -108,7 +108,7 @@
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editEnroll{{ $enrollment->id }}"><i class="ti ti-pencil"></i></button>
-                                            <a href="" class="btn btn-danger btn-sm" data-confirm-delete="true">Delete</a>
+                                            <a href="{{ route('enrollments.destroy', $enrollment->id) }}" class="btn btn-danger btn-sm" data-confirm-delete="true">Delete</a>
                                         </div>
                                     </td>
                                 </tr>
