@@ -94,7 +94,7 @@
                     </a>
                 </li>
             @endif
-            @if(Auth::user()->hasRole('manager|finance|admin'))
+            @if(Auth::user()->hasRole('super-admin|manager|finance|admin'))
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('payments.index') }}" aria-expanded="false">
                   <span>
