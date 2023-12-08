@@ -62,6 +62,7 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::post('/payments/store', [PaymentController::class, 'store'])->name('payments.store');
         Route::post('/payments/find-enrollment', [PaymentController::class, 'findEnrollment'])->name('payments.find.enrollment');
+        Route::delete('/payments/destroy/{id}', [PaymentController::class, 'destroy'])->name('payments.destroy');
 
     });
 

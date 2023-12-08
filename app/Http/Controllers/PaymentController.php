@@ -38,7 +38,7 @@ class PaymentController extends Controller
 
 
         $title = 'Delete Payment!';
-        $text = "Are you sure to delete? It will also minus total paid.";
+        $text = "Are you sure to delete? It will also minus details from Enrollment data.";
         confirmDelete($title, $text);
 
         return view('payments', compact('payments'));
@@ -202,7 +202,20 @@ class PaymentController extends Controller
     public function destroy(string $id)
     {
         $payment = Payment::find($id);
-        if(isset($payment)){
+        if (isset($payment)) {
+            $enrollment = $payment->enrollment;
+            $enrollment->total_paid -= $payment->amount_paid;
+
+            if ($payment->is_installment) {
+                $enrollment->installment_completed -= 1;
+            }else{
+                if($enrollment->payment_mode == 'upfront'){
+                    $enrollment->upfront_paid -= $payment->amount_paid;
+                }
+            }
+
+            $enrollment->update();
+
             $payment->delete();
             Alert::success('Success', "Payment deleted successfully.");
             return redirect()->back();
@@ -211,6 +224,4 @@ class PaymentController extends Controller
             return redirect()->back();
         }
     }
-
-
 }

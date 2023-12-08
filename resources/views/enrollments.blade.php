@@ -145,8 +145,8 @@
                                                         @enderror
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label for="totalCost" class="form-label">Total Cost <span class="text-danger">*</span></label>
-                                                        <input type="text" name="new_total_cost" class="form-control" value="{{ $enrollment->total_cost }}" id="totalCost" required>
+                                                        <label for="newTotalCost" class="form-label">Total Cost <span class="text-danger">*</span></label>
+                                                        <input type="text" name="new_total_cost" class="form-control" value="{{ $enrollment->total_cost }}" id="newTotalCost" required>
                                                         @error('new_total_cost')
                                                             <p class="text-danger">{{  $message }}</p>
                                                         @enderror
@@ -559,7 +559,7 @@
     });
 </script>
 
-<script>
+{{-- <script>
     document.addEventListener('DOMContentLoaded', function () {
         var modals = document.querySelectorAll('.common-modal');
 
@@ -598,6 +598,6 @@
             }
         });
     });
-</script>
+</script> --}}
 
 @endsection

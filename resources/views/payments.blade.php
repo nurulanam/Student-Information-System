@@ -83,7 +83,7 @@
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editEnroll{{ $payment->id }}"><i class="ti ti-pencil"></i></button>
-                                        <a href="{{ route('enrollments.destroy', $payment->id) }}" class="btn btn-danger btn-sm" data-confirm-delete="true">Delete</a>
+                                        <a href="{{ route('payments.destroy', $payment->id) }}" class="btn btn-danger btn-sm" data-confirm-delete="true">Delete</a>
                                     </div>
                                 </td>
                             </tr>
