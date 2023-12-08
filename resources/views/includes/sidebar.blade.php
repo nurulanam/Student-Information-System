@@ -28,11 +28,35 @@
               <li class="sidebar-item">
                 <a class="sidebar-link" href="{{ route('users.index') }}" aria-expanded="false">
                   <span>
-                    <i class="ti ti-users"></i>
+                    <i class="ti ti-id-badge"></i>
                   </span>
                   <span class="hide-menu">Users</span>
                 </a>
               </li>
+              <li class="sidebar-item">
+                <a class="sidebar-link" href="{{ route('enrollments.index') }}" aria-expanded="false">
+                <span>
+                    <i class="ti ti-user-plus"></i>
+                </span>
+                <span class="hide-menu">Enrollment</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="{{ route('students.index') }}" aria-expanded="false">
+                  <span>
+                    <i class="ti ti-users"></i>
+                  </span>
+                  <span class="hide-menu">Students</span>
+                </a>
+            </li>
+              <li class="sidebar-item">
+                <a class="sidebar-link" href="{{ route('programs.index') }}" aria-expanded="false">
+                  <span>
+                    <i class="ti ti-layout-dashboard"></i>
+                  </span>
+                  <span class="hide-menu">Programs</span>
+                </a>
+            </li>
             @endif
             @if(Auth::user()->hasRole('manager'))
                 <li class="sidebar-item">

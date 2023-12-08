@@ -82,11 +82,84 @@
                                 <td>{{ $payment->notes }}</td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editEnroll{{ $payment->id }}"><i class="ti ti-pencil"></i></button>
+                                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editPayment{{ $payment->id }}"><i class="ti ti-pencil"></i></button>
+                                        @if(Auth::user()->hasRole('super-admin|manager|finance'))
                                         <a href="{{ route('payments.destroy', $payment->id) }}" class="btn btn-danger btn-sm" data-confirm-delete="true">Delete</a>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
+                            <div class="modal fade" id="editPayment{{  $payment->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Update Installment</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                        <form action="{{ route('payments.update') }}" method="post">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="id" value="{{ $payment->id }}">
+                                            <div class="mb-3">
+                                                <label for="newInstallmentAmount" class="form-label">Installment Amount<span class="text-danger">*</span></label>
+                                                <input type="number" name="new_amount_paid" class="form-control" value="{{  $payment->amount_paid }}" step="any" min="0" id="newInstallmentAmount" required>
+                                            </div>
+                                            @error('new_amount_paid')
+                                                <p class="text-danger">{{  $message }}</p>
+                                            @enderror
+
+                                            <div class="mb-3">
+                                                <label for="newPaymentType" class="form-label">Payment Type <span class="text-danger">*</span></label>
+                                                <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="new_payment_type" value="cash" id="newPaymentType1{{ $payment->id }}" @if($payment->payment_type == 'cash') checked @endif required>
+                                                        <label class="form-check-label" for="newPaymentType1{{ $payment->id }}}">
+                                                            Cash
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="new_payment_type" value="bank_transfer" id="newPaymentType2{{ $payment->id }}" @if($payment->payment_type == 'bank_transfer') checked @endif>
+                                                        <label class="form-check-label" for="newPaymentType2{{ $payment->id }}">
+                                                            Bank Transfer
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="new_payment_type" value="direct_debit" id="newPaymentType3{{ $payment->id }}" @if($payment->payment_type == 'direct_debit') checked @endif>
+                                                        <label class="form-check-label" for="newPaymentType3{{ $payment->id }}">
+                                                            Direct Debit
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="new_payment_type" value="credit_card" id="newPaymentType4{{ $payment->id }}" @if($payment->payment_type == 'credit_card') checked @endif>
+                                                        <label class="form-check-label" for="newPaymentType4{{ $payment->id }}">
+                                                            Credit Card
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                @error('new_payment_type')
+                                                    <p class="text-danger">{{  $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="newNotes{{ $payment->id }}" class="form-label">Notes</label>
+                                                <textarea name="new_notes" class="form-control" id="newNotes{{ $payment->id }}" rows="2">{{  $payment->notes }}</textarea>
+                                                @error('new_notes')
+                                                    <p class="text-danger">{{  $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div class="d-flex justify-content-end align-items-center gap-2">
+                                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                                                <button class="btn btn-primary" id="PayInstallmentBtn">Pay Installment</button>
+                                            </div>
+                                        </form>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         @endforeach
 
                     </tbody>
@@ -206,8 +279,6 @@
 
         function fetchEnrollmentData() {
             var enrollmentId = $('#enrollmentId').val();
-            console.log(enrollmentId);
-
             // Set the CSRF token value
             $.ajaxSetup({
                 headers: {
@@ -254,7 +325,7 @@
 
                     $('#PayInstallmentBtn').removeAttr('type');
                     $('#PayInstallmentBtn').prop('disabled', false);
-                    // console.error('Error fetching data:', error.responseText);
+                    console.error('Error fetching data:', error.responseText);
                 }
             });
         }

@@ -172,28 +172,62 @@ class PaymentController extends Controller
             ]);
         }
     }
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
-        //
+        $validation = Validator::make($request->all(), [
+            'id' => 'required',
+            'new_amount_paid' => 'required|numeric|min:0',
+            'new_payment_type' => 'required|in:cash,bank_transfer,direct_debit,credit_card',
+            'new_notes' => 'nullable|string',
+        ]);
+
+        if ($validation->fails())
+        {
+            Alert::error('Error', "Please fill correct information.");
+            return redirect()->back()->withErrors($validation)->withInput();
+        }
+        else
+        {
+            $payment = Payment::find($request->id);
+            if (isset($payment)) {
+                $old_payment_amount = $payment->amount_paid;
+                $enrollment = $payment->enrollment;
+                $minus_amount = $enrollment->total_paid - $old_payment_amount;
+                $new_amount = $minus_amount + $request->new_amount_paid;
+
+                $payment->amount_paid = $request->new_amount_paid;
+                $payment->payment_type = $request->new_payment_type;
+                $payment->notes = $request->new_notes;
+                $payment->update();
+
+                $enrollment->total_paid = $new_amount;
+                $enrollment->update();
+
+                // $enrollment = $payment->enrollment;
+
+                // $payment->update([
+                //     'amount_paid' => $request->new_amount_paid,
+                //     'payment_type' => $request->new_payment_type,
+                //     'notes' => $request->new_notes,
+                // ]);
+
+                // $enrollment->update([
+                //     'total_paid' => $enrollment->total_paid
+                //         - $payment->getOriginal('amount_paid')
+                //         + $request->new_amount_paid,
+                // ]);
+
+                Alert::success('Success', "Payment updated successfully.");
+                return redirect()->back();
+            }else{
+                Alert::error('Error', "Payment not found.");
+                return redirect()->back();
+            }
+        }
     }
 
     /**

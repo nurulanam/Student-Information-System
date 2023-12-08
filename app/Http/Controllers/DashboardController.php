@@ -18,9 +18,9 @@ class DashboardController extends Controller
         if ($user->hasRole('super-admin') || $user->hasRole('manager')) {
             return $this->redirectToUpdates();
         } elseif ($user->hasRole('finance')) {
-            return $this->redirectToStatics();
+            return $this->redirectToEnrollments();
         } elseif ($user->hasRole('admin')) {
-            return $this->redirectToStudents();
+            return $this->redirectToPayments();
         }
 
         // Default redirection
@@ -32,8 +32,12 @@ class DashboardController extends Controller
         return redirect('/dashboard/updates');
     }
 
-    protected function redirectToStudents(): RedirectResponse
+    protected function redirectToEnrollments(): RedirectResponse
     {
-        return redirect('/dashboard/students');
+        return redirect('/dashboard/enrollments');
+    }
+    protected function redirectToPayments(): RedirectResponse
+    {
+        return redirect('/dashboard/payments');
     }
 }

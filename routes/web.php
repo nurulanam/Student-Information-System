@@ -42,7 +42,7 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
         Route::get('/updates', [UpdateController::class, 'index'])->name('updates.index');
     });
 
-    Route::middleware(['auth', 'role:manager|finance'])->group(function () {
+    Route::middleware(['auth', 'role:super-admin|manager|finance'])->group(function () {
         //Students
         Route::get('/students', [StudentController::class, 'index'])->name('students.index');
         Route::post('/students/store', [StudentController::class, 'store'])->name('students.store');
@@ -55,18 +55,20 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
         Route::put('/enrollments/update', [EnrollmentController::class, 'update'])->name('enrollments.update');
         Route::delete('/enrollments/destroy/{id}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
 
-    });
-
-    Route::middleware(['auth', 'role:manager|finance|admin'])->group(function () {
         // payment
-        Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
-        Route::post('/payments/store', [PaymentController::class, 'store'])->name('payments.store');
-        Route::post('/payments/find-enrollment', [PaymentController::class, 'findEnrollment'])->name('payments.find.enrollment');
+        Route::put('/payments/update/', [PaymentController::class, 'update'])->name('payments.update');
         Route::delete('/payments/destroy/{id}', [PaymentController::class, 'destroy'])->name('payments.destroy');
 
     });
 
-    Route::middleware(['auth', 'role:manager'])->group(function () {
+    Route::middleware(['auth', 'role:super-admin|manager|finance|admin'])->group(function () {
+        // payment
+        Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+        Route::post('/payments/store', [PaymentController::class, 'store'])->name('payments.store');
+        Route::post('/payments/find-enrollment', [PaymentController::class, 'findEnrollment'])->name('payments.find.enrollment');
+    });
+
+    Route::middleware(['auth', 'role:super-admin|manager'])->group(function () {
         // Programs
         Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
         Route::post('/programs/store', [ProgramController::class, 'store'])->name('programs.store');
