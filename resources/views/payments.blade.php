@@ -8,7 +8,7 @@
     <div class="col-12">
         <div class="card w-100">
             <div class="card-header d-flex flex-column flex-lg-row justify-content-md-between align-items-center">
-                <h1 class="card-title">All Enrollments</h1>
+                <h1 class="card-title">All Payments</h1>
                 <div class="d-flex flex-wrap flex-md-nowrap justify-content-center justify-content-md-end align-items-center gap-3">
                     <a href="{{ route('payments.index') }}" class="btn btn-danger order-1 order-md-0"><i class="ti ti-reload"></i></a>
                     <form action="{{ route('payments.index') }}" method="get" class="order-0 order-md-1">
@@ -178,8 +178,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <!-- resources/views/installments/create.blade.php -->
-
                     <form action="{{ route('payments.store') }}" method="post">
                         @csrf
                         <div class="mb-3">

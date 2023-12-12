@@ -106,8 +106,11 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <div class="d-flex align-items-center gap-2">
+                                        <div class="d-flex align-items-center justify-content-between gap-2">
                                             <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editEnroll{{ $enrollment->id }}"><i class="ti ti-pencil"></i></button>
+                                            @if ($enrollment->payment_mode === 'upfront' || $enrollment->payment_mode === 'installment')
+                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addPayment{{ $enrollment->id }}">$</button>
+                                            @endif
                                             <a href="{{ route('enrollments.destroy', $enrollment->id) }}" class="btn btn-danger btn-sm" data-confirm-delete="true">Delete</a>
                                         </div>
                                     </td>
@@ -249,6 +252,140 @@
                                         </div>
                                     </div>
                                 </div>
+                                @if ($enrollment->payment_mode === 'upfront' || $enrollment->payment_mode === 'installment')
+                                <div class="modal fade" id="addPayment{{ $enrollment->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Pay Installment</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                            <form action="{{ route('payments.store') }}" method="post">
+                                                @csrf
+                                                @php
+                                                    if (!$enrollment->total_paid || !$enrollment->total_installment) {
+                                                        // Handle invalid data
+                                                        $perInstallment = 0; // or display message
+                                                    } else {
+                                                        $checkTotalInstallment = $enrollment->installment_completed;
+                                                        $check = $checkTotalInstallment + 1;
+
+                                                        if ($check > $enrollment->total_installment) {
+                                                            $perInstallment = 0;
+                                                        } else {
+                                                            $dueAmount = $enrollment->total_cost - $enrollment->total_paid;
+                                                            $dueInstallment = $enrollment->total_installment - $checkTotalInstallment;
+                                                            $perInstallment = $dueAmount / $dueInstallment;
+                                                        }
+                                                    }
+                                                @endphp
+                                                <input type="hidden" name="enrollment_id" class="form-control" value="{{ $enrollment->enroll_id }}" id="enrollmentId" required>
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <label class="form-label" >
+                                                        Total Cost
+                                                    </label>
+                                                    <p>{{ $enrollment->total_cost }}</p>
+                                                </div>
+                                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                                    <label class="form-label" >
+                                                        Total Due
+                                                    </label>
+                                                    <p>{{ $dueAmount }}</p>
+                                                </div>
+
+                                                <div class="d-flex align-items-center flex-wrap mb-3">
+
+                                                    @foreach (range(1, $enrollment->total_installment) as $installmentNumber)
+                                                        @php
+                                                            $payment = $enrollment->payments->where('installment_number', $installmentNumber)->first();
+                                                            $amountPaid = $payment ? $payment->amount_paid : 0;
+                                                            $disabled = true;
+                                                            if($check == $installmentNumber){
+                                                                $disabled = false;
+                                                            }
+                                                        @endphp
+
+                                                        <div class="d-flex align-items-center ps-2 mb-3" style="width: 33.33%">
+                                                            <div class="form-check">
+                                                                <input
+                                                                    class="form-check-input"
+                                                                    type="checkbox"
+                                                                    @if ($disabled && $installmentNumber < $check) checked disabled @elseif($disabled && $installmentNumber > $check) disabled @else required @endif
+                                                                >
+                                                            </div>
+                                                            <input
+                                                                type="number"
+                                                                name="amount_paid"
+                                                                class="form-control @if ($disabled && $installmentNumber < $check) bg-success-subtle @elseif($disabled && $installmentNumber > $check) bg-danger-subtle  @endif"
+                                                                @if ($installmentNumber < $check)
+                                                                    value="{{ $amountPaid }}"
+                                                                @elseif($installmentNumber >= $check)
+                                                                    value="{{ number_format($perInstallment, 2) }}"
+                                                                @endif
+                                                                step="any"
+                                                                min="0"
+                                                                @if ($disabled) disabled @endif
+                                                                required>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                                @error('amount_paid')
+                                                    <p class="text-danger">{{  $message }}</p>
+                                                @enderror
+
+                                                <div class="mb-3">
+                                                    <label for="paymentType" class="form-label">Payment Type <span class="text-danger">*</span></label>
+                                                    <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="payment_type" value="cash" id="paymentType1" @if(old('payment_type') == 'cash') checked @endif required>
+                                                            <label class="form-check-label" for="paymentType1">
+                                                                Cash
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="payment_type" value="bank_transfer" id="paymentType2" @if(old('payment_type') == 'bank_transfer') checked @endif>
+                                                            <label class="form-check-label" for="paymentType2">
+                                                                Bank Transfer
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="payment_type" value="direct_debit" id="paymentType3" @if(old('payment_type') == 'direct_debit') checked @endif>
+                                                            <label class="form-check-label" for="paymentType3">
+                                                                Direct Debit
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="payment_type" value="credit_card" id="paymentType4" @if(old('payment_type') == 'credit_card') checked @endif>
+                                                            <label class="form-check-label" for="paymentType4">
+                                                                Credit Card
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    @error('payment_type')
+                                                        <p class="text-danger">{{  $message }}</p>
+                                                    @enderror
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="notes" class="form-label">Notes</label>
+                                                    <textarea name="notes" class="form-control" id="notes" rows="2"></textarea>
+                                                    @error('notes')
+                                                        <p class="text-danger">{{  $message }}</p>
+                                                    @enderror
+                                                </div>
+
+                                                <div class="d-flex justify-content-end align-items-center gap-2">
+                                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                                                    <button class="btn btn-primary" id="PayInstallmentBtn">Pay Installment</button>
+                                                </div>
+                                            </form>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
                             @endforeach
                         </tbody>
                     </table>
@@ -325,18 +462,6 @@
                                     <label for="totalInstallment" class="form-label">Installments <span class="text-danger">*</span></label>
                                     <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="total_installment" value="1" @if(old('total_installment') == '1') checked @endif id="totalInstallment1" data-full-payment-field>
-                                            <label class="form-check-label" for="totalInstallment1">
-                                             1
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="total_installment" value="2" @if(old('total_installment') == '2') checked @endif id="totalInstallment2" data-full-payment-field>
-                                            <label class="form-check-label" for="totalInstallment2">
-                                             2
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
                                             <input class="form-check-input" type="radio" name="total_installment" value="3" @if(old('total_installment') == '3') checked @endif id="totalInstallment3" data-full-payment-field>
                                             <label class="form-check-label" for="totalInstallment3">
                                              3
@@ -364,12 +489,6 @@
                                             <input class="form-check-input" type="radio" name="total_installment" value="7" @if(old('total_installment') == '7') checked @endif id="totalInstallment7" data-full-payment-field>
                                             <label class="form-check-label" for="totalInstallment7">
                                              7
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="total_installment" value="8" @if(old('total_installment') == '8') checked @endif id="totalInstallment8" data-full-payment-field>
-                                            <label class="form-check-label" for="totalInstallment8">
-                                             8
                                             </label>
                                         </div>
                                     </div>

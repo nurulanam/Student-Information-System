@@ -96,21 +96,21 @@ class PaymentController extends Controller
                                 $enrollment->update();
 
                                 Alert::success('Success', "Payment successfully created.");
-                                return redirect()->route('payments.index');
+                                return redirect()->back();
                             }else{
                                 Alert::error('Error', "Payment Failed.");
-                                return redirect()->route('payments.index');
+                                return redirect()->back();
                             }
                         }else{
                             Alert::error('Error', "Already paid all installments.");
-                            return redirect()->route('payments.index');
+                            return redirect()->back();
                         }
                     }
                 }
             }
             else{
                 Alert::error('Error', "No enrollment record found.");
-                return redirect()->route('payments.index');
+                return redirect()->back();
             }
         }
     }
@@ -204,22 +204,11 @@ class PaymentController extends Controller
                 $payment->notes = $request->new_notes;
                 $payment->update();
 
+                if(!$payment->is_installment && $enrollment->payment_mode == 'upfront'){
+                    $enrollment->upfront_paid = $payment->amount_paid;
+                }
                 $enrollment->total_paid = $new_amount;
                 $enrollment->update();
-
-                // $enrollment = $payment->enrollment;
-
-                // $payment->update([
-                //     'amount_paid' => $request->new_amount_paid,
-                //     'payment_type' => $request->new_payment_type,
-                //     'notes' => $request->new_notes,
-                // ]);
-
-                // $enrollment->update([
-                //     'total_paid' => $enrollment->total_paid
-                //         - $payment->getOriginal('amount_paid')
-                //         + $request->new_amount_paid,
-                // ]);
 
                 Alert::success('Success', "Payment updated successfully.");
                 return redirect()->back();
