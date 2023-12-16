@@ -19,6 +19,7 @@ class Enrollment extends Model
         "total_installment",
         "installment_completed",
         "status",
+        "due_dates",
         "notes",
     ];
     public function student()

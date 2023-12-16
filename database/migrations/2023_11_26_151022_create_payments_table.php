@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('enrollment_id');
+            $table->unsignedBigInteger('created_by');
             $table->boolean('is_installment')->nullable();
             $table->integer('installment_number')->nullable();
             $table->decimal('amount_paid', 8, 2);
@@ -22,6 +23,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('enrollment_id')->references('id')->on('enrollments')->onDelete('cascade');
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

@@ -14,6 +14,7 @@
                                 <button class="btn btn-primary"id="search"><i class="ti ti-search"></i></button>
                             </div>
                         </form>
+                        <button type="button" class="btn btn-primary order-2 order-md-2" data-bs-toggle="modal" data-bs-target="#uploadStudent"><span class="me-2"><i class="ti ti-file"></i></span>Upload CSV</button>
                         <button type="button" class="btn btn-primary order-2 order-md-2" data-bs-toggle="modal" data-bs-target="#addStudent"><span class="me-2"><i class="ti ti-user-plus"></i></span>Add Student</button>
                     </div>
                 </div>
@@ -103,7 +104,34 @@
             <div class="d-flex justify-content-end align-items-end">
                 {!! $students->links() !!}
             </div>
-
+            <div class="modal fade" id="uploadStudent" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Upload Students <span class="text-danger"> CSV</span></h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-danger" role="alert">
+                                If any student have same E-mail that student will be auto skipped.
+                              </div>
+                            <form action="{{ route('students.upload') }}" method="post" enctype="multipart/form-data">
+                                @csrf
+                                <div class="mb-3">
+                                    <input class="form-control" type="file" name="csv_file" accept=".csv" required>
+                                    @error('csv_file')
+                                        <p class="text-danger">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div class="d-flex justify-content-end align-items-center gap-2">
+                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                                    <button class="btn btn-primary">Add Student</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Modal -->
             <div class="modal fade" id="addStudent" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">

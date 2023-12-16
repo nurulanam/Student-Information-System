@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('total_paid', 8, 2)->default(0);
             $table->decimal('upfront_paid', 8, 2)->nullable();
             $table->string('status')->default('disable')->comment('active, disable');
+            $table->json('due_dates')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
 

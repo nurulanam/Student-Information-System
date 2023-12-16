@@ -8,6 +8,7 @@ use App\Models\Student;
 use Illuminate\View\View;
 use App\Models\Enrollment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Validator;
@@ -60,7 +61,7 @@ class EnrollmentController extends Controller
             'payment_option' => 'required|in:full,upfront,installment',
             'total_installment' => 'required_if:payment_option,in:installment,upfront|integer|min:1',
             'amount_paid' => 'required_if:payment_option,in:full,upfront',
-            'payment_type' => 'required|in:cash,bank_transfer,direct_debit,credit_card',
+            'payment_type' => 'required_if:payment_option,in:full,upfront|in:cash,bank_transfer,direct_debit,credit_card',
             'notes' => 'nullable|string',
         ]);
 
@@ -94,6 +95,22 @@ class EnrollmentController extends Controller
                 if ($request->payment_option == 'upfront') {
                     $enrollment->upfront_paid = $request->amount_paid;
                 }
+
+                // If total_installment is provided, create JSON array
+                if ($request->has('total_installment')) {
+                    $dueDates = [];
+
+                    for ($i = 1; $i <= $request->total_installment; $i++) {
+                        $dueDates[$i] = '';
+                    }
+                    $enrollment->due_dates = json_encode($dueDates);
+                }
+
+                // Assign the array to the due_dates field
+
+
+
+
                 $enrollment->notes = $request->notes;
                 $enrollment->save();
 
@@ -204,10 +221,12 @@ class EnrollmentController extends Controller
         // For full or upfront payment, create a single payment record
         $payment = Payment::create([
             'enrollment_id' => $enrollment->id,
+            'created_by' => Auth::id(),
             'amount_paid' => $request->amount_paid,
             'payment_type' => $request->payment_type,
             'notes' => $request->notes,
         ]);
+
         $enrollment->increment('total_paid', $request->amount_paid);
         return $payment;
     }

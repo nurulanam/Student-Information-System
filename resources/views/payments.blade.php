@@ -34,6 +34,9 @@
                     <tr>
                         <th>
                             <h6 class="fw-semibold mb-0">Enroll Id</h6>
+                        </th
+                        ><th>
+                            <h6 class="fw-semibold mb-0">Created By</h6>
                         </th>
                         <th>
                             <h6 class="fw-semibold mb-0">Installment</h6>
@@ -51,6 +54,9 @@
                             <h6 class="fw-semibold mb-0">Notes</h6>
                         </th>
                         <th>
+                            <h6 class="fw-semibold mb-0">Date & Time</h6>
+                        </th>
+                        <th>
                             <h6 class="fw-semibold mb-0">Action</h6>
                         </th>
                     </tr>
@@ -59,6 +65,7 @@
                         @foreach ($payments as $payment)
                             <tr>
                                 <td>{{ $payment->enrollment->enroll_id}}</td>
+                                <td>{{ $payment->createdBy->name}}</td>
                                 <td>
                                     @if ($payment->is_installment === 1)
                                         <span class="badge bg-primary">True</span>
@@ -80,6 +87,7 @@
                                     @endif
                                 </td>
                                 <td>{{ $payment->notes }}</td>
+                                <td>{{ $payment->created_at}}</td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editPayment{{ $payment->id }}"><i class="ti ti-pencil"></i></button>

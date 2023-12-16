@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\Enrollment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Validator;
 
@@ -55,6 +56,8 @@ class PaymentController extends Controller
             'enrollment_id' => 'required|exists:enrollments,enroll_id',
             'amount_paid' => 'required|numeric|min:0',
             'payment_type' => 'required|in:cash,bank_transfer,direct_debit,credit_card',
+            'due_dates' => 'nullable|array',
+            'due_dates.*' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
 
@@ -84,6 +87,7 @@ class PaymentController extends Controller
                         {
                             $payment = Payment::create([
                                 'enrollment_id' => $enrollment->id,
+                                'created_by' => Auth::Id(),
                                 'is_installment' => true,
                                 'installment_number' => $installment_number,
                                 'amount_paid' => $request->amount_paid,
@@ -93,6 +97,17 @@ class PaymentController extends Controller
                             if(isset($payment)){
                                 $enrollment->total_paid = $current_amount;
                                 $enrollment->installment_completed = $installment_number;
+
+                                if (!empty($request->due_dates)) {
+                                    $dueDates = json_decode($enrollment->due_dates, true);
+
+                                    foreach ($request->due_dates as $index => $dueDate) {
+                                        if (array_key_exists($index, $dueDates)) {
+                                            $dueDates[$index] = $dueDate;
+                                        }
+                                    $enrollment->due_dates = json_encode($dueDates);
+                                }
+
                                 $enrollment->update();
 
                                 Alert::success('Success', "Payment successfully created.");
@@ -114,6 +129,7 @@ class PaymentController extends Controller
             }
         }
     }
+}
 
 
 

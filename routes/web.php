@@ -47,6 +47,7 @@ Route::prefix('/dashboard')->middleware(['auth'])->group(function (){
         Route::get('/students', [StudentController::class, 'index'])->name('students.index');
         Route::post('/students/store', [StudentController::class, 'store'])->name('students.store');
         Route::put('/students/update', [StudentController::class, 'update'])->name('students.update');
+        Route::post('/students/upload', [StudentController::class, 'upload'])->name('students.upload');
         Route::delete('/students/destroy/{id}', [StudentController::class, 'destroy'])->name('students.destroy');
 
         //enrollments
